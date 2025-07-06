@@ -1,4 +1,4 @@
-// Variável global para armazenar todos os pesqueiros e os filtrados
+// Variáveis globais para armazenar todos os pesqueiros e os filtrados
 let todosOsPesqueiros = [];
 let pesqueirosFiltrados = [];
 
@@ -34,7 +34,7 @@ function renderTable(pesqueiros) {
     tableBody.innerHTML = ''; // Limpa a tabela
 
     if (pesqueiros.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="7" class="text-center p-4">Nenhum pesqueiro encontrado.</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="7" class="text-center p-4">Nenhum pesqueiro encontrado para este filtro.</td></tr>';
         return;
     }
 
@@ -75,29 +75,37 @@ function populateFishFilter(pesqueiros) {
     });
 
     allFish.forEach(fish => {
-        const option = document.createElement('option');
-        option.value = fish;
-        option.textContent = fish;
-        fishFilter.appendChild(option);
+        if (fish) { // Garante que não adicione opções vazias
+            const option = document.createElement('option');
+            option.value = fish;
+            option.textContent = fish;
+            fishFilter.appendChild(option);
+        }
     });
 }
 
 /**
- * Aplica os filtros e atualiza a tabela e o mapa.
+ * Aplica os filtros com base na seleção do usuário e atualiza a UI.
  */
 function applyFilters() {
     const timeFilterValue = document.getElementById('time-filter').value;
     const fishFilterValue = document.getElementById('fish-filter').value;
 
+    // 1. Filtra a lista principal de pesqueiros e guarda em 'pesqueirosFiltrados'
     pesqueirosFiltrados = todosOsPesqueiros.filter(p => {
         const timeMatch = timeFilterValue ? parseInt(p.TempoSemTransito) <= parseInt(timeFilterValue) : true;
         const fishMatch = fishFilterValue ? p.Peixes.toLowerCase().includes(fishFilterValue.toLowerCase()) : true;
         return timeMatch && fishMatch;
     });
 
+    // 2. Manda renderizar a tabela com os dados já filtrados
     renderTable(pesqueirosFiltrados);
+
+    // 3. Manda o mapa limpar os marcadores antigos e adicionar apenas os novos,
+    // usando a mesma lista de dados filtrados.
     addMarkersToMap(pesqueirosFiltrados, showDetailsModal);
 }
+
 
 /**
  * Configura todos os listeners de eventos da página.
@@ -124,8 +132,10 @@ function setupEventListeners() {
         if (!id) return;
         
         if (target.classList.contains('btn-edit')) {
+            e.stopPropagation(); // Impede que o clique se propague para a linha (tr)
             showFormModal(id);
         } else if (target.classList.contains('btn-delete')) {
+            e.stopPropagation(); // Impede que o clique se propague
             if (confirm('Tem certeza que deseja excluir este pesqueiro?')) {
                 handleDelete(id);
             }
@@ -160,24 +170,21 @@ function showFormModal(id = null) {
     const modalTitle = document.getElementById('modal-title');
     const form = document.getElementById('pesqueiro-form');
     
-    form.reset(); // Limpa o formulário
+    form.reset();
     document.getElementById('form-content').style.display = 'block';
     document.getElementById('details-content').style.display = 'none';
 
     if (id) {
-        // Modo Edição
         modalTitle.textContent = 'Editar Pesqueiro';
         const pesqueiro = todosOsPesqueiros.find(p => p.ID == id);
-        // Preenche o formulário com os dados existentes
         for (const key in pesqueiro) {
             if (form.elements[key]) {
                 form.elements[key].value = pesqueiro[key];
             }
         }
     } else {
-        // Modo Adição
         modalTitle.textContent = 'Adicionar Novo Pesqueiro';
-        form.elements['ID'].value = ''; // Garante que o ID está vazio
+        form.elements['ID'].value = '';
     }
 
     modal.classList.remove('hidden');
@@ -199,15 +206,17 @@ function showDetailsModal(id) {
     detailsContent.style.display = 'block';
     modalTitle.textContent = pesqueiro.NomePesqueiro;
 
+    const peixesHtml = pesqueiro.Peixes ? pesqueiro.Peixes.split(',').map(p => `<span class="bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded">${p.trim()}</span>`).join('') : 'Não informado';
+
     detailsContent.innerHTML = `
-        <p><strong>Endereço:</strong> ${pesqueiro.EnderecoCompleto || 'Não informado'}</p>
-        <p><strong>Cidade/UF:</strong> ${pesqueiro.CidadeUF}</p>
-        <p><strong>Telefone/WhatsApp:</strong> ${pesqueiro.Telefone || 'Não informado'}</p>
-        <p><strong>Peixes Principais:</strong> <span class="bg-blue-100 text-blue-800 text-sm font-medium mr-2 px-2.5 py-0.5 rounded">${pesqueiro.Peixes.split(',').join(', ')}</span></p>
-        <p><strong>Preço Médio:</strong> R$ ${pesqueiro.PrecoMedio}</p>
-        <p><strong>Aceita Reserva:</strong> ${pesqueiro.AceitaReserva}</p>
-        <p><strong>Site:</strong> <a href="${pesqueiro.Site}" target="_blank" class="text-blue-500 hover:underline">${pesqueiro.Site || 'Nenhum'}</a></p>
-        <p><strong>Instagram:</strong> <a href="${pesqueiro.Instagram}" target="_blank" class="text-blue-500 hover:underline">${pesqueiro.Instagram || 'Nenhum'}</a></p>
+        <p class="mb-2"><strong>Endereço:</strong> ${pesqueiro.EnderecoCompleto || 'Não informado'}</p>
+        <p class="mb-2"><strong>Cidade/UF:</strong> ${pesqueiro.CidadeUF}</p>
+        <p class="mb-2"><strong>Telefone/WhatsApp:</strong> ${pesqueiro.Telefone || 'Não informado'}</p>
+        <div class="mb-2"><strong>Peixes Principais:</strong> ${peixesHtml}</div>
+        <p class="mb-2"><strong>Preço Médio:</strong> R$ ${pesqueiro.PrecoMedio}</p>
+        <p class="mb-2"><strong>Aceita Reserva:</strong> ${pesqueiro.AceitaReserva}</p>
+        <p class="mb-2"><strong>Site:</strong> <a href="${pesqueiro.Site}" target="_blank" class="text-blue-500 hover:underline">${pesqueiro.Site || 'Nenhum'}</a></p>
+        <p class="mb-2"><strong>Instagram:</strong> <a href="${pesqueiro.Instagram}" target="_blank" class="text-blue-500 hover:underline">${pesqueiro.Instagram || 'Nenhum'}</a></p>
         <div class="mt-4">
             <a href="https://waze.com/ul?ll=${pesqueiro.Latitude},${pesqueiro.Longitude}&navigate=yes" target="_blank" class="inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
                 Abrir Rota no Waze
@@ -241,10 +250,8 @@ async function handleFormSubmit(e) {
 
     let response;
     if (pesqueiroData.ID) {
-        // Atualizar
         response = await updatePesqueiro(pesqueiroData);
     } else {
-        // Criar
         response = await createPesqueiro(pesqueiroData);
     }
     
@@ -252,7 +259,7 @@ async function handleFormSubmit(e) {
 
     if (response.status === 'success') {
         hideModal();
-        initUI(); // Recarrega tudo
+        initUI();
     } else {
        showLoading(false);
     }
@@ -268,12 +275,11 @@ async function handleDelete(id) {
     alert(response.message);
     
     if (response.status === 'success') {
-        initUI(); // Recarrega tudo
+        initUI();
     } else {
         showLoading(false);
     }
 }
-
 
 // Inicia a aplicação quando o DOM estiver pronto
 document.addEventListener('DOMContentLoaded', initUI);
