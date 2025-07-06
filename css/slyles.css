@@ -30,3 +30,13 @@
 #modal {
     z-index: 9999 !important;
 }
+
+/*
+  Solução definitiva para o problema de sobreposição, 
+  forçando o container do mapa a ter um contexto de 
+  empilhamento definido e de baixa prioridade.
+*/
+#map-container {
+    position: relative;
+    z-index: 0;
+}
