@@ -1,5 +1,5 @@
 // ATENÇÃO: Cole aqui a URL do seu App da Web que você copiou do Google Apps Script.
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbykUTuZWXGRxCAkJTEMK1uT2knj4Y4I0QFg-DmyVjag3UmCZEYjmt19HeXmT_68dCnc/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzeNSPQSZj3kEtcfpKIobRscIMZWSq5RM-dtQT3vRzZ4iOVRNk-Geb_58Df5D_T1lL4/exec';
 
 /**
  * Busca todos os registros de pesqueiros na planilha.
