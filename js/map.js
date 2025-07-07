@@ -40,7 +40,6 @@ function addMarkersToMap(pesqueiros, onMarkerClick) {
 
             const pinColor = colors[index % colors.length];
 
-            // Cria um ícone customizado usando L.divIcon e SVG
             const svgPinIcon = L.divIcon({
                 className: '', // Não precisa de classe wrapper
                 html: `
@@ -58,32 +57,40 @@ function addMarkersToMap(pesqueiros, onMarkerClick) {
             });
 
             const marker = L.marker([lat, lng], { icon: svgPinIcon }).addTo(map);
-
+            
+            // --- CONTEÚDO DO POPUP ATUALIZADO ---
             const popupContent = `
-                <b>${index + 1}. ${p.NomePesqueiro}</b><br>
-                ${p.CidadeUF}<br>
-                <a href="https://waze.com/ul?ll=${lat},${lng}&navigate=yes" target="_blank">Rota com Waze</a><br>
-                <a href="#" class="details-link" data-id="${p.ID}">Ver mais detalhes</a>
+                <div style="text-align: center;">
+                    <b>${index + 1}. ${p.NomePesqueiro}</b><br>
+                    <small>${p.CidadeUF}</small>
+                    <hr style="margin: 5px 0;">
+                    <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}" target="_blank" style="color: #4285F4;">Rota com Google Maps</a><br>
+                    <a href="https://waze.com/ul?ll=${lat},${lng}&navigate=yes" target="_blank" style="color: #33ccff;">Rota com Waze</a><br>
+                    <a href="#" class="details-link" data-id="${p.ID}" style="color: #0056b3; font-weight: bold;">Ver mais detalhes</a>
+                </div>
             `;
             marker.bindPopup(popupContent);
 
-            markers.push(marker);
-        } else {
-            console.warn(`Aviso: O pesqueiro '${p.NomePesqueiro}' não tem coordenadas e não será exibido no mapa.`);
-        }
-    });
-
-    // Adiciona listener para os links de "Ver mais detalhes" dentro dos popups
-    setTimeout(() => {
-        document.querySelectorAll('.details-link').forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                const id = e.target.getAttribute('data-id');
-                if (id) {
-                    map.closePopup(); // Fecha o popup antes de abrir o modal
-                    showDetailsModal(id);
+            // --- CORREÇÃO DO BUG DO BOTÃO "VER MAIS DETALHES" ---
+            // Adicionamos o evento de clique no momento em que o popup é aberto
+            marker.on('popupopen', (e) => {
+                const popup = e.popup;
+                const link = popup.getElement().querySelector('.details-link');
+                if (link) {
+                    link.addEventListener('click', (ev) => {
+                        ev.preventDefault();
+                        const id = ev.target.getAttribute('data-id');
+                        if (id) {
+                            map.closePopup();
+                            onMarkerClick(id); // Chama a função para abrir o modal
+                        }
+                    });
                 }
             });
-        });
-    }, 100);
+
+            markers.push(marker);
+        } else {
+            console.warn(`Aviso: O pesqueiro '${p.NomePesqueiro}' (ID: ${p.ID}) não tem coordenadas e não será exibido no mapa.`);
+        }
+    });
 }
