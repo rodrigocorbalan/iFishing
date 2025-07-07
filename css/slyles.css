@@ -31,3 +31,17 @@
     position: relative;
     z-index: 0;
 }
+
+/* Estilo para os marcadores numerados no mapa */
+.numbered-marker {
+    background-color: #3498db; /* Azul */
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+    text-align: center;
+    line-height: 22px; /* Ajuste para centralizar o número verticalmente */
+    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+    cursor: pointer;
+}

@@ -32,36 +32,43 @@ function clearMarkers() {
 }
 
 /**
- * Adiciona marcadores ao mapa para cada pesqueiro na lista.
- * @param {Array<object>} pesqueiros - A lista de pesqueiros vinda da API.
+ * Adiciona marcadores numerados ao mapa para cada pesqueiro na lista.
+ * @param {Array<object>} pesqueiros - A lista de pesqueiros.
  * @param {Function} onMarkerClick - Função a ser chamada quando um marcador é clicado.
  */
 function addMarkersToMap(pesqueiros, onMarkerClick) {
     clearMarkers(); // Limpa os marcadores antigos antes de adicionar novos
 
-    pesqueiros.forEach(p => {
-        // Verifica se o pesqueiro tem coordenadas de latitude e longitude válidas
+    // Usamos o forEach com 'index' para ter a numeração
+    pesqueiros.forEach((p, index) => {
         if (p.Latitude && p.Longitude) {
             const lat = parseFloat(p.Latitude);
             const lng = parseFloat(p.Longitude);
 
-            // Cria o marcador e o adiciona ao mapa
-            const marker = L.marker([lat, lng]).addTo(map);
+            // Cria um ícone customizado usando L.divIcon
+            const numberIcon = L.divIcon({
+                className: 'numbered-marker', // A classe CSS que estilizamos
+                html: `<b>${index + 1}</b>`,     // O número que será exibido
+                iconSize: [25, 25],          // Tamanho do ícone
+                iconAnchor: [12, 25],        // Ponto de "ancoragem" do ícone no mapa
+                popupAnchor: [0, -20]        // Ponto de onde o popup deve abrir
+            });
 
-            // Cria o conteúdo do popup que aparece ao clicar no marcador
+            // Cria o marcador usando o novo ícone
+            const marker = L.marker([lat, lng], { icon: numberIcon }).addTo(map);
+
+            // O conteúdo do popup continua o mesmo
             const popupContent = `
-                <b>${p.NomePesqueiro}</b><br>
+                <b>${index + 1}. ${p.NomePesqueiro}</b><br>
                 ${p.CidadeUF}<br>
                 <a href="https://waze.com/ul?ll=${lat},${lng}&navigate=yes" target="_blank">Rota com Waze</a>
             `;
             marker.bindPopup(popupContent);
 
-            // Adiciona um evento de clique para abrir a tela de detalhes completos
             marker.on('click', () => {
                 onMarkerClick(p.ID); 
             });
 
-            // Guarda a referência do marcador para poder limpá-lo depois
             markers.push(marker);
         }
     });

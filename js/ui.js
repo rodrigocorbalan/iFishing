@@ -17,20 +17,27 @@ async function initUI() {
 }
 
 /**
- * Renderiza a tabela de pesqueiros.
+ * Renderiza a tabela de pesqueiros, agora com uma coluna de numeração.
+ * @param {Array<object>} pesqueiros - A lista de pesqueiros para exibir.
  */
 function renderTable(pesqueiros) {
     const tableBody = document.getElementById('pesqueiros-table-body');
-    tableBody.innerHTML = '';
+    tableBody.innerHTML = ''; // Limpa a tabela
+
     if (pesqueiros.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="7" class="text-center p-4">Nenhum pesqueiro encontrado para este filtro.</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="8" class="text-center p-4">Nenhum pesqueiro encontrado para este filtro.</td></tr>';
         return;
     }
-    pesqueiros.forEach(p => {
+
+    // Usamos o segundo parâmetro 'index' do forEach para obter a numeração
+    pesqueiros.forEach((p, index) => {
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-gray-100 cursor-pointer';
         tr.setAttribute('data-id', p.ID);
+
+        // Adicionamos a célula <td> com o número (index + 1)
         tr.innerHTML = `
+            <td class="p-2 border-t text-center font-medium">${index + 1}</td>
             <td class="p-2 border-t">${p.NomePesqueiro}</td>
             <td class="p-2 border-t">${p.CidadeUF}</td>
             <td class="p-2 border-t">${p.TempoSemTransito} min</td>
