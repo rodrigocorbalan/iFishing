@@ -13,8 +13,8 @@
 }
 
 .spinner {
-    border: 8px solid #f3f3f3;
-    border-top: 8px solid #3498db;
+    border: 8px solid #f3f3f3; /* Light grey */
+    border-top: 8px solid #3498db; /* Blue */
     border-radius: 50%;
     width: 60px;
     height: 60px;
@@ -38,7 +38,7 @@
 }
 
 
-/* --- ESTILOS PARA MARCADOR SVG NUMERADO E POPUP CUSTOMIZADO --- */
+/* --- ESTILOS FINAIS PARA MARCADOR SVG E POPUP CUSTOMIZADO --- */
 
 /* Container que segura o SVG e o número */
 .svg-marker-container {
@@ -61,17 +61,21 @@
     text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
 }
 
+/* --- ESTILOS CORRIGIDOS PARA O POPUP CUSTOMIZADO --- */
+
 /* Customização do container do popup do Leaflet */
 .custom-popup .leaflet-popup-content-wrapper {
     background: #f8f9fa;
     border-radius: 10px;
-    padding: 0;
-    overflow: hidden; /* Garante que os cantos arredondados funcionem */
+    padding: 1px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.2);
 }
 
 .custom-popup .leaflet-popup-content {
     margin: 0 !important;
-    padding: 10px;
+    padding: 12px;
+    /* LARGURA MÍNIMA: A chave para o layout não quebrar */
+    min-width: 240px; 
 }
 
 /* Estilo para o título do pesqueiro dentro do popup */
@@ -79,7 +83,7 @@
     background: white;
     border-left: 5px solid; /* A cor da borda será definida via JS */
     padding: 8px 12px;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
     font-weight: bold;
     color: black;
     font-size: 16px;
@@ -89,9 +93,8 @@
 /* Container para os botões de ação */
 .popup-buttons-container {
     display: flex;
-    justify-content: space-around;
-    align-items: center;
-    padding-top: 5px;
+    justify-content: space-around; /* Espaça os botões igualmente */
+    align-items: flex-start;
 }
 
 /* Estilo para cada botão no popup */
@@ -100,17 +103,21 @@
     flex-direction: column;
     align-items: center;
     text-decoration: none;
-    font-size: 10px;
+    font-size: 11px;
     color: #555;
     font-weight: 500;
+    width: 75px; /* Largura para cada botão ajudar no alinhamento */
+    text-align: center;
+    transition: opacity 0.2s;
 }
 
 .popup-button:hover {
     opacity: 0.7;
 }
 
+/* TAMANHO CORRIGIDO DOS ÍCONES */
 .popup-button img {
-    width: 28px;
-    height: 28px;
-    margin-bottom: 2px;
+    width: 36px;  /* Tamanho fixo e adequado */
+    height: 36px;
+    margin-bottom: 4px;
 }
