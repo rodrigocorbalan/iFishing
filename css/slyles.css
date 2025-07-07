@@ -13,8 +13,8 @@
 }
 
 .spinner {
-    border: 8px solid #f3f3f3;
-    border-top: 8px solid #3498db;
+    border: 8px solid #f3f3f3; /* Light grey */
+    border-top: 8px solid #3498db; /* Blue */
     border-radius: 50%;
     width: 60px;
     height: 60px;
@@ -26,22 +26,60 @@
     100% { transform: rotate(360deg); }
 }
 
-/* Solução definitiva para o problema de sobreposição */
+/* Garante que o modal fique na camada superior absoluta */
+#modal {
+    z-index: 9999 !important;
+}
+
+/* Força o container do mapa a ter um contexto de empilhamento de baixa prioridade */
 #map-container {
     position: relative;
     z-index: 0;
 }
 
-/* Estilo para os marcadores numerados no mapa */
-.numbered-marker {
-    background-color: #3498db; /* Azul */
-    border: 2px solid #ffffff;
-    border-radius: 50%;
-    color: white;
-    font-weight: bold;
-    font-size: 14px;
-    text-align: center;
-    line-height: 22px; /* Ajuste para centralizar o número verticalmente */
-    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+
+/* --- ESTILOS PARA MARCADORES CUSTOMIZADOS (ALFINETE + ETIQUETA) --- */
+
+/* Container principal para o marcador customizado (alfinete + etiqueta) */
+.custom-marker-container {
+    display: flex;
+    align-items: center;
     cursor: pointer;
+}
+
+/* Estiliza o pino do mapa */
+.marker-pin {
+    width: 30px;
+    height: 30px;
+    border-radius: 50% 50% 50% 0; /* Cria a forma de pino invertido */
+    background: #c32b2b; /* Cor padrão, será alterada via JS */
+    position: relative;
+    transform: rotate(-45deg);
+    border: 2px solid white;
+    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+}
+
+/* Cria o círculo branco no centro do pino */
+.marker-pin::after {
+    content: '';
+    width: 14px;
+    height: 14px;
+    margin: 8px 0 0 8px;
+    background: #ffffff;
+    position: absolute;
+    border-radius: 50%;
+}
+
+/* Estiliza a etiqueta com o nome do pesqueiro */
+.marker-label {
+    position: absolute;
+    left: 40px; /* Posiciona a etiqueta à direita do pino */
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: bold;
+    white-space: nowrap; /* Impede que o nome quebre em várias linhas */
+    box-shadow: 0 0 5px rgba(0,0,0,0.3);
 }

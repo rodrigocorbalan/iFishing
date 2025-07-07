@@ -3,7 +3,6 @@ const markers = []; // Array para guardar os marcadores e poder limpá-los
 
 /**
  * Inicializa o mapa Leaflet na div especificada.
- * @param {string} mapId - O ID do elemento HTML onde o mapa será renderizado.
  */
 function initMap(mapId) {
     // Coordenadas de exemplo para centralizar o mapa (São Paulo)
@@ -13,11 +12,7 @@ function initMap(mapId) {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
 
-    // =================================================================
-    // LINHA DE CÓDIGO DA SOLUÇÃO FINAL:
-    // Força o container do mapa a ter um z-index baixo via JavaScript,
-    // garantindo que ele fique atrás de outros elementos como o modal.
-    // =================================================================
+    // Solução definitiva para o problema de sobreposição do modal
     document.getElementById(mapId).style.zIndex = 0;
 }
 
@@ -32,44 +27,51 @@ function clearMarkers() {
 }
 
 /**
- * Adiciona marcadores numerados ao mapa para cada pesqueiro na lista.
- * @param {Array<object>} pesqueiros - A lista de pesqueiros.
- * @param {Function} onMarkerClick - Função a ser chamada quando um marcador é clicado.
+ * Adiciona marcadores customizados (pino + nome) ao mapa para cada pesqueiro na lista.
  */
 function addMarkersToMap(pesqueiros, onMarkerClick) {
-    clearMarkers(); // Limpa os marcadores antigos antes de adicionar novos
+    clearMarkers(); // Limpa os marcadores antigos
 
-    // Usamos o forEach com 'index' para ter a numeração
+    // Define uma paleta de cores para variar os pinos
+    const colors = ['#e6194B', '#3cb44b', '#4363d8', '#f58231', '#911eb4', '#46f0f0', '#f032e6', '#bcf60c', '#fabebe', '#008080', '#e6beff', '#9A6324'];
+
     pesqueiros.forEach((p, index) => {
         if (p.Latitude && p.Longitude) {
             const lat = parseFloat(p.Latitude);
             const lng = parseFloat(p.Longitude);
 
-            // Cria um ícone customizado usando L.divIcon
-            const numberIcon = L.divIcon({
-                className: 'numbered-marker', // A classe CSS que estilizamos
-                html: `<b>${index + 1}</b>`,     // O número que será exibido
-                iconSize: [25, 25],          // Tamanho do ícone
-                iconAnchor: [12, 25],        // Ponto de "ancoragem" do ícone no mapa
-                popupAnchor: [0, -20]        // Ponto de onde o popup deve abrir
+            // Seleciona uma cor da paleta de forma rotativa
+            const pinColor = colors[index % colors.length];
+
+            // Cria um ícone customizado usando L.divIcon com nosso novo HTML e CSS
+            const customIcon = L.divIcon({
+                className: 'custom-marker-wrapper', // Classe wrapper que não precisa de estilo
+                html: `
+                    <div class="custom-marker-container">
+                        <div class="marker-pin" style="background-color: ${pinColor};"></div>
+                        <div class="marker-label">${p.NomePesqueiro}</div>
+                    </div>
+                `,
+                iconSize: [180, 40],  // Largura aumentada para acomodar a etiqueta
+                iconAnchor: [15, 35],   // Posição da "ponta" do pino
+                popupAnchor: [0, -30]   // Posição de onde o popup deve abrir
             });
 
             // Cria o marcador usando o novo ícone
-            const marker = L.marker([lat, lng], { icon: numberIcon }).addTo(map);
+            const marker = L.marker([lat, lng], { icon: customIcon }).addTo(map);
 
-            // O conteúdo do popup continua o mesmo
+            // O popup continua útil para mostrar mais detalhes rapidamente
             const popupContent = `
-                <b>${index + 1}. ${p.NomePesqueiro}</b><br>
+                <b>${p.NomePesqueiro}</b><br>
                 ${p.CidadeUF}<br>
+                Preço: R$ ${p.PrecoMedio}<br>
                 <a href="https://waze.com/ul?ll=${lat},${lng}&navigate=yes" target="_blank">Rota com Waze</a>
             `;
             marker.bindPopup(popupContent);
 
-            marker.on('click', () => {
-                onMarkerClick(p.ID); 
-            });
-
             markers.push(marker);
+        } else {
+            console.warn(`Aviso: O pesqueiro '${p.NomePesqueiro}' (ID: ${p.ID}) não tem coordenadas e não será exibido no mapa.`);
         }
     });
 }
