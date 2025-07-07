@@ -29,13 +29,11 @@ function renderTable(pesqueiros) {
         return;
     }
 
-    // Usamos o segundo parâmetro 'index' do forEach para obter a numeração
     pesqueiros.forEach((p, index) => {
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-gray-100 cursor-pointer';
         tr.setAttribute('data-id', p.ID);
 
-        // Adicionamos a célula <td> com o número (index + 1)
         tr.innerHTML = `
             <td class="p-2 border-t text-center font-medium">${index + 1}</td>
             <td class="p-2 border-t">${p.NomePesqueiro}</td>
@@ -67,7 +65,7 @@ function populateFishFilter(pesqueiros) {
             fishes.forEach(fish => allFish.add(fish));
         }
     });
-    // Limpa opções antigas antes de adicionar novas, exceto a primeira ("Todas")
+    
     while (fishFilter.options.length > 1) {
         fishFilter.remove(1);
     }
@@ -85,27 +83,21 @@ function populateFishFilter(pesqueiros) {
  * Aplica os filtros com base na seleção do usuário e atualiza a UI.
  */
 function applyFilters() {
-    // 1. Pega o valor de todos os campos de filtro
     const nameFilterValue = document.getElementById('name-filter').value.toLowerCase();
     const timeFilterValue = document.getElementById('time-filter').value;
     const fishFilterValue = document.getElementById('fish-filter').value;
     const priceFilterValue = document.getElementById('price-filter').value;
     const reserveFilterValue = document.getElementById('reserve-filter').value;
 
-    // 2. Filtra a lista principal de pesqueiros
     pesqueirosFiltrados = todosOsPesqueiros.filter(p => {
-        const nameMatch = nameFilterValue ? 
-            p.NomePesqueiro.toLowerCase().includes(nameFilterValue) || p.CidadeUF.toLowerCase().includes(nameFilterValue) : 
-            true;
+        const nameMatch = nameFilterValue ? p.NomePesqueiro.toLowerCase().includes(nameFilterValue) || p.CidadeUF.toLowerCase().includes(nameFilterValue) : true;
         const timeMatch = timeFilterValue ? parseInt(p.TempoSemTransito) <= parseInt(timeFilterValue) : true;
         const fishMatch = fishFilterValue ? p.Peixes.toLowerCase().includes(fishFilterValue.toLowerCase()) : true;
         const priceMatch = priceFilterValue ? parseFloat(p.PrecoMedio) <= parseFloat(priceFilterValue) : true;
         const reserveMatch = reserveFilterValue ? p.AceitaReserva === reserveFilterValue : true;
-
         return nameMatch && timeMatch && fishMatch && priceMatch && reserveMatch;
     });
 
-    // 3. Manda renderizar a tabela e o mapa com os dados já filtrados
     renderTable(pesqueirosFiltrados);
     addMarkersToMap(pesqueirosFiltrados, showDetailsModal);
 }
@@ -114,7 +106,6 @@ function applyFilters() {
  * Configura todos os listeners de eventos da página, com correção para o clique nos botões.
  */
 function setupEventListeners() {
-    // Filtros
     document.getElementById('name-filter').addEventListener('input', applyFilters);
     document.getElementById('price-filter').addEventListener('input', applyFilters);
     document.getElementById('reserve-filter').addEventListener('change', applyFilters);
@@ -130,55 +121,44 @@ function setupEventListeners() {
         applyFilters();
     });
 
-    // Botão para adicionar novo pesqueiro
     document.getElementById('add-pesqueiro-btn').addEventListener('click', () => showFormModal());
 
-    // Event Delegation para cliques na tabela
     const tableBody = document.getElementById('pesqueiros-table-body');
     tableBody.addEventListener('click', (e) => {
         const target = e.target;
         const id = target.closest('tr').getAttribute('data-id');
-
         if (!id) return;
         
-        // Se o clique foi no botão de editar
         if (target.classList.contains('btn-edit')) {
-            e.stopPropagation(); // Impede o clique de se propagar para a linha
+            e.stopPropagation();
             showFormModal(id);
-        
-        // Se o clique foi no botão de excluir
         } else if (target.classList.contains('btn-delete')) {
-            e.stopPropagation(); // Impede o clique de se propagar para a linha
+            e.stopPropagation();
             if (confirm('Tem certeza que deseja excluir este pesqueiro?')) {
                 handleDelete(id);
             }
-        
-        // Se o clique foi na linha (mas não nos botões)
         } else {
              showDetailsModal(id);
         }
     });
 
-    // Fechar modal
     document.querySelector('.modal-close-btn').addEventListener('click', hideModal);
     document.querySelector('.modal-bg').addEventListener('click', hideModal);
-
-    // Submit do formulário
     document.getElementById('pesqueiro-form').addEventListener('submit', handleFormSubmit);
 }
 
 /**
  * Exibe ou esconde o spinner de carregamento.
- * @param {boolean} isLoading - True para mostrar, false para esconder.
  */
 function showLoading(isLoading) {
     const loader = document.getElementById('loader');
-    loader.style.display = isLoading ? 'flex' : 'none';
+    if (loader) {
+        loader.style.display = isLoading ? 'flex' : 'none';
+    }
 }
 
 /**
  * Exibe o modal com o formulário para adicionar ou editar um pesqueiro.
- * @param {string|null} id - O ID do pesqueiro para editar, ou null para adicionar um novo.
  */
 function showFormModal(id = null) {
     const modal = document.getElementById('modal');
@@ -192,9 +172,11 @@ function showFormModal(id = null) {
     if (id) {
         modalTitle.textContent = 'Editar Pesqueiro';
         const pesqueiro = todosOsPesqueiros.find(p => p.ID == id);
-        for (const key in pesqueiro) {
-            if (form.elements[key]) {
-                form.elements[key].value = pesqueiro[key];
+        if(pesqueiro) {
+            for (const key in pesqueiro) {
+                if (form.elements[key]) {
+                    form.elements[key].value = pesqueiro[key];
+                }
             }
         }
     } else {
@@ -207,7 +189,6 @@ function showFormModal(id = null) {
 
 /**
 * Exibe o modal com os detalhes completos de um pesqueiro.
-* @param {string} id - O ID do pesqueiro.
 */
 function showDetailsModal(id) {
     const modal = document.getElementById('modal');
@@ -253,7 +234,6 @@ function hideModal() {
 
 /**
  * Lida com o envio do formulário (criação ou atualização).
- * @param {Event} e - O evento de submit.
  */
 async function handleFormSubmit(e) {
     e.preventDefault();
@@ -274,7 +254,7 @@ async function handleFormSubmit(e) {
 
     if (response.status === 'success') {
         hideModal();
-        await initUI(); // Usa await para garantir que a UI seja totalmente recarregada
+        await initUI();
     } else {
        showLoading(false);
     }
@@ -282,7 +262,6 @@ async function handleFormSubmit(e) {
 
 /**
  * Lida com a exclusão de um pesqueiro.
- * @param {string} id - O ID do pesqueiro a ser excluído.
  */
 async function handleDelete(id) {
     showLoading(true);
@@ -290,7 +269,7 @@ async function handleDelete(id) {
     alert(response.message);
     
     if (response.status === 'success') {
-        await initUI(); // Usa await para garantir que a UI seja totalmente recarregada
+        await initUI();
     } else {
         showLoading(false);
     }
