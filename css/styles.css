@@ -6,7 +6,7 @@
     width: 100%;
     height: 100%;
     background-color: rgba(255, 255, 255, 0.7);
-    z-index: 10000; /* Z-index mais alto */
+    z-index: 10000;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -26,8 +26,8 @@
     100% { transform: rotate(360deg); }
 }
 
-/* Garante que o modal fique na camada superior absoluta */
-#modal {
+/* Garante que os modais fiquem na camada superior absoluta */
+#modal, #confirm-delete-modal {
     z-index: 9999 !important;
 }
 
@@ -37,36 +37,26 @@
     z-index: 0;
 }
 
-/* --- ESTILOS PARA MARCADOR COM ETIQUETA DE TEXTO PERMANENTE --- */
-
-/* Container principal que segura o pino e a etiqueta de texto */
-.marker-with-label-container {
-    display: flex;
-    align-items: center;
-    background: transparent;
-    border: none;
+/* Estilos para o popup customizado */
+.svg-marker-container {
+    position: relative;
     cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-/* O pino SVG */
-.marker-with-label-container svg {
-    filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.7));
-}
-
-/* A etiqueta de texto ao lado do pino */
-.map-text-label {
-    margin-left: 8px; /* Espaço entre o pino e o texto */
-    background: rgba(255, 255, 255, 0.85); /* Fundo branco semi-transparente */
-    padding: 3px 8px;
-    border-radius: 4px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.4); /* Cria o efeito de "moldura" com sombra */
-    color: #333;
-    font-size: 11px; /* <<< FONTE DIMINUÍDA DE 13px PARA 11px */
+.marker-number {
+    position: absolute;
+    top: 13px;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 12px;
     font-weight: bold;
-    white-space: nowrap; /* Impede que o nome quebre em várias linhas */
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
 }
 
-/* --- ESTILOS PARA O POPUP CUSTOMIZADO --- */
 .custom-popup .leaflet-popup-content-wrapper {
     background: #ffffff;
     border-radius: 8px;
@@ -74,40 +64,47 @@
     box-shadow: 0 3px 15px rgba(0,0,0,0.2);
     border: 1px solid #ddd;
 }
+
 .custom-popup .leaflet-popup-content {
     margin: 0 !important;
     padding: 15px;
     min-width: 250px;
     font-family: sans-serif;
 }
+
 .popup-main-content {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 12px;
 }
+
 .popup-header {
     text-align: center;
     width: 100%;
     border-bottom: 1px solid #eee;
     padding-bottom: 10px;
 }
+
 .popup-header h5 {
     font-size: 18px;
     font-weight: bold;
     color: #333;
     margin: 0;
 }
+
 .popup-header p {
     font-size: 13px;
     color: #777;
     margin: 2px 0 0 0;
 }
+
 .popup-actions {
     display: flex;
     justify-content: space-around;
     width: 100%;
 }
+
 .action-button {
     display: flex;
     flex-direction: column;
@@ -118,11 +115,18 @@
     font-size: 12px;
     transition: transform 0.2s ease;
 }
+
 .action-button:hover {
     transform: scale(1.1);
 }
+
 .action-button img {
     width: 40px;
     height: 40px;
     margin-bottom: 5px;
+}
+
+/* Novo estilo para o ícone de casa */
+.home-icon {
+    filter: drop-shadow(2px 2px 3px rgba(0,0,0,0.6));
 }

@@ -1,16 +1,44 @@
 let map = null;
 const markers = []; // Array para guardar os marcadores e poder limpá-los
 
+/**
+ * Inicializa o mapa, adiciona o controle de tela cheia e o marcador de casa.
+ */
 function initMap(mapId) {
-    map = L.map(mapId).setView([-23.5505, -46.6333], 8);
+    // Coordenadas para Rua Sud Menucci, 170, Santo André, SP
+    const homeCoords = [-23.6763, -46.5414]; 
+
+    // Inicializa o mapa com o controle de tela cheia
+    map = L.map(mapId, {
+        fullscreenControl: true,
+        fullscreenControlOptions: {
+            position: 'topright'
+        }
+    }).setView(homeCoords, 13); // Inicia com zoom no ponto de partida
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
 
+    // Cria e adiciona o ícone de casa
+    const homeIcon = L.icon({
+        iconUrl: 'https://cdn-icons-png.flaticon.com/512/1946/1946436.png',
+        iconSize: [40, 40],
+        iconAnchor: [20, 40],
+        popupAnchor: [0, -40],
+        className: 'home-icon'
+    });
+
+    L.marker(homeCoords, { icon: homeIcon }).addTo(map)
+        .bindPopup('<b>Seu Ponto de Partida</b><br>Rua Sud Menucci, 170');
+
+    // Garante que o mapa fique na camada de trás
     document.getElementById(mapId).style.zIndex = 0;
 }
 
+/**
+ * Limpa todos os marcadores de pesqueiros do mapa.
+ */
 function clearMarkers() {
     markers.forEach(marker => {
         map.removeLayer(marker);
@@ -18,6 +46,9 @@ function clearMarkers() {
     markers.length = 0;
 }
 
+/**
+ * Adiciona marcadores de pesqueiros ao mapa.
+ */
 function addMarkersToMap(pesqueiros, onMarkerClick) {
     clearMarkers();
 
@@ -54,7 +85,7 @@ function addMarkersToMap(pesqueiros, onMarkerClick) {
                         <p>${p.CidadeUF}</p>
                     </div>
                     <div class="popup-actions">
-                        <a href="https://www.google.com/maps?q=${lat},${lng}" target="_blank" class="action-button">
+                        <a href="http://googleusercontent.com/maps.google.com/5{lat},${lng}" target="_blank" class="action-button">
                             <img src="img/icon_gmaps.svg" alt="Google Maps">
                             <span>Google Maps</span>
                         </a>
