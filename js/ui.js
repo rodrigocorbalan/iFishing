@@ -14,11 +14,11 @@ async function initUI() {
     addMarkersToMap(pesqueirosFiltrados, showDetailsModal);
     populateFishFilter(todosOsPesqueiros);
     setupEventListeners();
-    showLoading(false); // Movido para o final, após setupEventListeners
+    showLoading(false);
 }
 
 /**
- * Renderiza a tabela de pesqueiros.
+ * Renderiza a tabela de pesqueiros com os botões de ação estilizados.
  */
 function renderTable(pesqueiros) {
     const tableBody = document.getElementById('pesqueiros-table-body');
@@ -37,11 +37,13 @@ function renderTable(pesqueiros) {
             <td class="p-2 border-t">${p.CidadeUF}</td>
             <td class="p-2 border-t">${p.TempoSemTransito} min</td>
             <td class="p-2 border-t">${p.Distancia} km</td>
-            <td class="p-2 border-t">R$ ${p.PrecoMedio}</td>
+            <td class="p-2 border-t">${p.PrecoMedio}</td>
             <td class="p-2 border-t">${p.AceitaReserva}</td>
             <td class="p-2 border-t">
-                <button class="text-blue-500 hover:underline btn-edit">Editar</button>
-                <button class="text-red-500 hover:underline ml-2 btn-delete">Excluir</button>
+                <div class="flex gap-2">
+                    <button class="btn-edit text-xs bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded">Editar</button>
+                    <button class="btn-delete text-xs bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">Excluir</button>
+                </div>
             </td>
         `;
         tableBody.appendChild(tr);
@@ -224,12 +226,12 @@ function showDetailsModal(id) {
         <p class="mb-2"><strong>Cidade/UF:</strong> ${pesqueiro.CidadeUF}</p>
         <p class="mb-2"><strong>Telefone/WhatsApp:</strong> ${pesqueiro.Telefone || 'Não informado'}</p>
         <div class="mb-2"><strong>Peixes Principais:</strong> ${peixesHtml}</div>
-        <p class="mb-2"><strong>Preço Médio:</strong> R$ ${pesqueiro.PrecoMedio}</p>
+        <p class="mb-2"><strong>Preço Médio:</strong> R$ ${p.PrecoMedio}</p>
         <p class="mb-2"><strong>Aceita Reserva:</strong> ${pesqueiro.AceitaReserva}</p>
         <p class="mb-2"><strong>Site:</strong> <a href="${pesqueiro.Site}" target="_blank" class="text-blue-500 hover:underline">${pesqueiro.Site || 'Nenhum'}</a></p>
         <p class="mb-2"><strong>Instagram:</strong> <a href="${pesqueiro.Instagram}" target="_blank" class="text-blue-500 hover:underline">${pesqueiro.Instagram || 'Nenhum'}</a></p>
         <div class="mt-6 pt-4 border-t flex items-center gap-4">
-            <a href="https://www.google.com/maps?q=${pesqueiro.Latitude},${pesqueiro.Longitude}" target="_blank" class="flex-1 text-center bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+            <a href="https://www.google.com/maps/dir/?api=1&destination=${pesqueiro.Latitude},${pesqueiro.Longitude}" target="_blank" class="flex-1 text-center bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
                 Rota com Google Maps
             </a>
             <a href="https://waze.com/ul?ll=${pesqueiro.Latitude},${pesqueiro.Longitude}&navigate=yes" target="_blank" class="flex-1 text-center bg-cyan-500 text-white px-4 py-2 rounded hover:bg-cyan-600">
@@ -295,6 +297,7 @@ async function handleDelete(id) {
     const response = await deletePesqueiro(id);
     alert(response.message);
     if (response.status === 'success') {
+        hideConfirmDeleteModal(); // Também fechar o modal de confirmação
         await initUI();
     } else {
         showLoading(false);
