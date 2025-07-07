@@ -6,29 +6,36 @@
     <title>Gestão de Pesqueiros</title>
     <link rel="icon" type="image/png" href="img/fishing.png">
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
     <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/Leaflet.fullscreen.min.js'></script>
     <link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/leaflet.fullscreen.css' rel='stylesheet' />
-
     <link rel="stylesheet" href="css/styles.css">
 </head>
-<body class="bg-gray-50 text-sm"> <div id="loader" class="hidden">
+<body class="bg-gray-50 text-sm">
+
+    <div id="loader" class="hidden">
         <div class="spinner"></div>
     </div>
 
-    <header class="bg-blue-600 text-white p-3 shadow-md"> <div class="container mx-auto flex justify-between items-center">
+    <header class="bg-blue-600 text-white p-3 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
             <div class="flex items-center">
-                <img src="img/fishing.png" alt="Ícone de peixe" class="h-7 w-7 mr-2"> <h1 class="text-xl font-bold">Gerenciador de Pesqueiros</h1> </div>
-            <button id="add-pesqueiro-btn" class="bg-white text-blue-600 font-semibold px-3 py-1.5 rounded hover:bg-gray-200 text-sm"> + Adicionar Pesqueiro
+                <img src="img/fishing.png" alt="Ícone de peixe" class="h-7 w-7 mr-2">
+                <h1 class="text-xl font-bold">Gerenciador de Pesqueiros</h1>
+            </div>
+            <button id="add-pesqueiro-btn" class="bg-white text-blue-600 font-semibold px-3 py-1.5 rounded hover:bg-gray-200 text-sm">
+                + Adicionar Pesqueiro
             </button>
         </div>
     </header>
 
     <main class="container mx-auto p-4">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4"> <section id="filters" class="bg-white p-3 rounded-lg shadow"> <h2 class="text-lg font-semibold mb-3">Filtros de Busca</h2> <div class="grid grid-cols-1 md:grid-cols-2 gap-3"> <div class="md:col-span-2">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+            <section id="filters" class="bg-white p-3 rounded-lg shadow">
+                <h2 class="text-lg font-semibold mb-3">Filtros de Busca</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div class="md:col-span-2">
                         <label for="name-filter" class="block text-xs font-medium text-gray-700">Nome ou Cidade</label>
                         <input type="text" id="name-filter" placeholder="Digite para buscar..." class="mt-1 block w-full p-1.5 border border-gray-300 rounded-md text-sm">
                     </div>
@@ -187,6 +194,54 @@
                 <button id="btn-cancel-delete" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10">
                     Não, cancelar
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="visitas-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center p-4 z-50">
+        <div class="modal-bg fixed inset-0"></div>
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl z-10 max-h-[90vh] flex flex-col">
+            <div class="p-4 border-b flex justify-between items-center">
+                <h2 id="visitas-modal-title" class="text-2xl font-semibold">Histórico de Visitas</h2>
+                <button class="visitas-modal-close-btn text-gray-500 hover:text-gray-800 text-3xl">×</button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto">
+                <div class="border-b border-gray-200">
+                    <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                        <a href="#" id="tab-historico" class="border-blue-500 text-blue-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Histórico</a>
+                        <a href="#" id="tab-registrar" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Registrar Nova Visita</a>
+                    </nav>
+                </div>
+
+                <div id="content-historico" class="mt-6">
+                    <p id="historico-empty-state" class="text-gray-500">Nenhuma visita registrada para este pesqueiro ainda.</p>
+                    <div id="visitas-list" class="space-y-4">
+                    </div>
+                </div>
+
+                <div id="content-registrar" class="hidden mt-6">
+                    <form id="visita-form">
+                        <input type="hidden" id="visita-pesqueiro-id" name="PesqueiroID">
+                        <div class="grid grid-cols-1 gap-6">
+                            <div>
+                                <label for="DataVisita" class="block text-sm font-medium text-gray-700">Data da Visita</label>
+                                <input type="date" name="DataVisita" id="DataVisita" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
+                            </div>
+                            <div>
+                                <label for="PeixesCapturados" class="block text-sm font-medium text-gray-700">Peixes Capturados (espécie, quantidade, peso, etc.)</label>
+                                <textarea name="PeixesCapturados" id="PeixesCapturados" rows="3" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" placeholder="Ex: Tilápia, 5, 1.5kg; Pacu, 2, 3kg"></textarea>
+                            </div>
+                            <div>
+                                <label for="Observacoes" class="block text-sm font-medium text-gray-700">Observações (clima, iscas, etc.)</label>
+                                <textarea name="Observacoes" id="Observacoes" rows="4" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" placeholder="Ex: Dia ensolarado, usei massa como isca."></textarea>
+                            </div>
+                        </div>
+                        <div class="pt-5 text-right">
+                            <button type="submit" class="bg-blue-600 text-white font-semibold px-6 py-2 rounded hover:bg-blue-700">Salvar Visita</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>

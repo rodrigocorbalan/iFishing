@@ -1,7 +1,7 @@
 // Variáveis globais
 let todosOsPesqueiros = [];
 let pesqueirosFiltrados = [];
-let pesqueiroIdToDelete = null;
+let pesqueiroIdToDelete = null; // Guarda o ID do pesqueiro a ser excluído
 
 /**
  * Função principal que inicializa a UI.
@@ -11,14 +11,14 @@ async function initUI() {
     todosOsPesqueiros = await getPesqueiros();
     pesqueirosFiltrados = [...todosOsPesqueiros];
     renderTable(pesqueirosFiltrados);
-    addMarkersToMap(pesqueirosFiltrados, showDetailsModal);
+    addMarkersToMap(pesqueirosFiltrados, showVisitasModal); // Alterado para abrir o modal de visitas
     populateFishFilter(todosOsPesqueiros);
     setupEventListeners();
     showLoading(false);
 }
 
 /**
- * Renderiza a tabela de pesqueiros com os botões de ação estilizados.
+ * Renderiza a tabela de pesqueiros com botões de ação estilizados.
  */
 function renderTable(pesqueiros) {
     const tableBody = document.getElementById('pesqueiros-table-body');
@@ -32,14 +32,14 @@ function renderTable(pesqueiros) {
         tr.className = 'hover:bg-gray-100 cursor-pointer';
         tr.setAttribute('data-id', p.ID);
         tr.innerHTML = `
-            <td class="p-2 border-t text-center font-medium">${index + 1}</td>
-            <td class="p-2 border-t">${p.NomePesqueiro}</td>
-            <td class="p-2 border-t">${p.CidadeUF}</td>
-            <td class="p-2 border-t">${p.TempoSemTransito} min</td>
-            <td class="p-2 border-t">${p.Distancia} km</td>
-            <td class="p-2 border-t">${p.PrecoMedio}</td>
-            <td class="p-2 border-t">${p.AceitaReserva}</td>
-            <td class="p-2 border-t">
+            <td class="p-1.5 border-t text-center font-medium">${index + 1}</td>
+            <td class="p-1.5 border-t">${p.NomePesqueiro}</td>
+            <td class="p-1.5 border-t">${p.CidadeUF}</td>
+            <td class="p-1.5 border-t">${p.TempoSemTransito} min</td>
+            <td class="p-1.5 border-t">${p.Distancia} km</td>
+            <td class="p-1.5 border-t">${p.PrecoMedio}</td>
+            <td class="p-1.5 border-t">${p.AceitaReserva}</td>
+            <td class="p-1.5 border-t">
                 <div class="flex gap-2">
                     <button class="btn-edit text-xs bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded">Editar</button>
                     <button class="btn-delete text-xs bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">Excluir</button>
@@ -93,13 +93,14 @@ function applyFilters() {
         return nameMatch && timeMatch && fishMatch && priceMatch && reserveMatch;
     });
     renderTable(pesqueirosFiltrados);
-    addMarkersToMap(pesqueirosFiltrados, showDetailsModal);
+    addMarkersToMap(pesqueirosFiltrados, showVisitasModal);
 }
 
 /**
  * Configura todos os listeners de eventos da página.
  */
 function setupEventListeners() {
+    // Listeners dos Filtros
     document.getElementById('name-filter').addEventListener('input', applyFilters);
     document.getElementById('price-filter').addEventListener('input', applyFilters);
     document.getElementById('reserve-filter').addEventListener('change', applyFilters);
@@ -114,8 +115,10 @@ function setupEventListeners() {
         applyFilters();
     });
 
+    // Botão Adicionar Pesqueiro
     document.getElementById('add-pesqueiro-btn').addEventListener('click', () => showFormModal());
 
+    // Listener de cliques na tabela
     const tableBody = document.getElementById('pesqueiros-table-body');
     tableBody.addEventListener('click', (e) => {
         const target = e.target;
@@ -132,29 +135,60 @@ function setupEventListeners() {
             const nome = row.cells[1].textContent;
             showConfirmDeleteModal(id, nome);
         } else {
-             showDetailsModal(id);
+             const pesqueiro = todosOsPesqueiros.find(p => p.ID == id);
+             if(pesqueiro) showVisitasModal(id, pesqueiro.NomePesqueiro);
         }
     });
 
+    // Listeners do modal de formulário
     const formModal = document.getElementById('modal');
     formModal.querySelector('.modal-close-btn').addEventListener('click', hideModal);
     formModal.querySelector('.modal-bg').addEventListener('click', hideModal);
     document.getElementById('pesqueiro-form').addEventListener('submit', handleFormSubmit);
 
+    // Listeners do modal de confirmação de exclusão
     const confirmModal = document.getElementById('confirm-delete-modal');
     document.getElementById('btn-cancel-delete').addEventListener('click', hideConfirmDeleteModal);
-    confirmModal.addEventListener('click', (e) => {
-        if (e.target === confirmModal) {
-            hideConfirmDeleteModal();
-        }
-    });
+    confirmModal.addEventListener('click', (e) => { if (e.target === confirmModal) hideConfirmDeleteModal(); });
     document.getElementById('btn-confirm-delete').addEventListener('click', () => {
-        if (pesqueiroIdToDelete) {
-            handleDelete(pesqueiroIdToDelete);
-        }
-        hideConfirmDeleteModal();
+        if (pesqueiroIdToDelete) handleDelete(pesqueiroIdToDelete);
     });
 
+    // Listeners do modal de visitas
+    const visitasModal = document.getElementById('visitas-modal');
+    visitasModal.querySelectorAll('.visitas-modal-close-btn').forEach(btn => btn.addEventListener('click', hideVisitasModal));
+    visitasModal.querySelector('.modal-bg').addEventListener('click', hideVisitasModal);
+
+    // Navegação por Abas no modal de visitas
+    const tabHistorico = document.getElementById('tab-historico');
+    const tabRegistrar = document.getElementById('tab-registrar');
+    const contentHistorico = document.getElementById('content-historico');
+    const contentRegistrar = document.getElementById('content-registrar');
+    
+    tabHistorico.addEventListener('click', e => {
+        e.preventDefault();
+        tabHistorico.classList.add('border-blue-500', 'text-blue-600');
+        tabHistorico.classList.remove('border-transparent', 'text-gray-500');
+        tabRegistrar.classList.add('border-transparent', 'text-gray-500');
+        tabRegistrar.classList.remove('border-blue-500', 'text-blue-600');
+        contentHistorico.classList.remove('hidden');
+        contentRegistrar.classList.add('hidden');
+    });
+
+    tabRegistrar.addEventListener('click', e => {
+        e.preventDefault();
+        tabRegistrar.classList.add('border-blue-500', 'text-blue-600');
+        tabRegistrar.classList.remove('border-transparent', 'text-gray-500');
+        tabHistorico.classList.add('border-transparent', 'text-gray-500');
+        tabHistorico.classList.remove('border-blue-500', 'text-blue-600');
+        contentRegistrar.classList.remove('hidden');
+        contentHistorico.classList.add('hidden');
+    });
+
+    // Submit do formulário de visita
+    document.getElementById('visita-form').addEventListener('submit', handleVisitaFormSubmit);
+    
+    // Listener de geocoding
     const addressInput = document.getElementById('EnderecoCompleto');
     addressInput.addEventListener('blur', async (e) => {
         const address = e.target.value;
@@ -170,7 +204,7 @@ function setupEventListeners() {
         } else {
             latInput.value = '';
             lonInput.value = '';
-            alert('Endereço não encontrado. Por favor, verifique ou insira as coordenadas manualmente.');
+            alert('Endereço não encontrado.');
         }
     });
 }
@@ -208,122 +242,4 @@ function showFormModal(id = null) {
     modal.classList.remove('hidden');
 }
 
-function showDetailsModal(id) {
-    const modal = document.getElementById('modal');
-    const modalTitle = modal.querySelector('#modal-title');
-    const detailsContent = modal.querySelector('#details-content');
-    const pesqueiro = todosOsPesqueiros.find(p => p.ID == id);
-
-    if (!pesqueiro) return;
-
-    modal.querySelector('#form-content').style.display = 'none';
-    detailsContent.style.display = 'block';
-    modalTitle.textContent = pesqueiro.NomePesqueiro;
-
-    const peixesHtml = pesqueiro.Peixes ? pesqueiro.Peixes.split(',').map(p => `<span class="bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded">${p.trim()}</span>`).join('') : 'Não informado';
-    detailsContent.innerHTML = `
-        <p class="mb-2"><strong>Endereço:</strong> ${pesqueiro.EnderecoCompleto || 'Não informado'}</p>
-        <p class="mb-2"><strong>Cidade/UF:</strong> ${pesqueiro.CidadeUF}</p>
-        <p class="mb-2"><strong>Telefone/WhatsApp:</strong> ${pesqueiro.Telefone || 'Não informado'}</p>
-        <div class="mb-2"><strong>Peixes Principais:</strong> ${peixesHtml}</div>
-        <p class="mb-2"><strong>Preço Médio:</strong> R$ ${p.PrecoMedio}</p>
-        <p class="mb-2"><strong>Aceita Reserva:</strong> ${pesqueiro.AceitaReserva}</p>
-        <p class="mb-2"><strong>Site:</strong> <a href="${pesqueiro.Site}" target="_blank" class="text-blue-500 hover:underline">${pesqueiro.Site || 'Nenhum'}</a></p>
-        <p class="mb-2"><strong>Instagram:</strong> <a href="${pesqueiro.Instagram}" target="_blank" class="text-blue-500 hover:underline">${pesqueiro.Instagram || 'Nenhum'}</a></p>
-        <div class="mt-6 pt-4 border-t flex items-center gap-4">
-            <a href="https://www.google.com/maps/dir/?api=1&destination=${pesqueiro.Latitude},${pesqueiro.Longitude}" target="_blank" class="flex-1 text-center bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                Rota com Google Maps
-            </a>
-            <a href="https://waze.com/ul?ll=${pesqueiro.Latitude},${pesqueiro.Longitude}&navigate=yes" target="_blank" class="flex-1 text-center bg-cyan-500 text-white px-4 py-2 rounded hover:bg-cyan-600">
-                Rota com Waze
-            </a>
-            <button id="edit-in-modal-btn" data-id="${pesqueiro.ID}" class="flex-1 text-center bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
-                Editar Pesqueiro
-            </button>
-        </div>
-    `;
-    const editBtnInModal = detailsContent.querySelector('#edit-in-modal-btn');
-    if (editBtnInModal) {
-        editBtnInModal.addEventListener('click', (e) => {
-            const pesqueiroId = e.target.getAttribute('data-id');
-            hideModal();
-            setTimeout(() => {
-                showFormModal(pesqueiroId);
-            }, 100);
-        });
-    }
-    modal.classList.remove('hidden');
-}
-
-function hideModal() {
-    const modal = document.getElementById('modal');
-    modal.classList.add('hidden');
-}
-
-function showConfirmDeleteModal(id, nome) {
-    pesqueiroIdToDelete = id;
-    document.getElementById('pesqueiro-to-delete-name').textContent = nome;
-    document.getElementById('confirm-delete-modal').classList.remove('hidden');
-}
-
-function hideConfirmDeleteModal() {
-    pesqueiroIdToDelete = null;
-    document.getElementById('confirm-delete-modal').classList.add('hidden');
-}
-
-async function handleFormSubmit(e) {
-    e.preventDefault();
-    showLoading(true);
-    const form = e.target;
-    const formData = new FormData(form);
-    const pesqueiroData = Object.fromEntries(formData.entries());
-    let response;
-    if (pesqueiroData.ID) {
-        response = await updatePesqueiro(pesqueiroData);
-    } else {
-        response = await createPesqueiro(pesqueiroData);
-    }
-    alert(response.message);
-    if (response.status === 'success') {
-        hideModal();
-        await initUI();
-    } else {
-       showLoading(false);
-    }
-}
-
-async function handleDelete(id) {
-    showLoading(true);
-    const response = await deletePesqueiro(id);
-    alert(response.message);
-    if (response.status === 'success') {
-        hideConfirmDeleteModal(); // Também fechar o modal de confirmação
-        await initUI();
-    } else {
-        showLoading(false);
-    }
-}
-
-async function geocodeAddress(address) {
-    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=1`;
-    try {
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error('Falha na resposta da rede');
-        }
-        const data = await response.json();
-        if (data && data.length > 0) {
-            return {
-                lat: data[0].lat,
-                lon: data[0].lon
-            };
-        }
-        return null;
-    } catch (error) {
-        console.error("Erro ao buscar coordenadas:", error);
-        return null;
-    }
-}
-
-// Inicia a aplicação
-document.addEventListener('DOMContentLoaded', initUI);
+//

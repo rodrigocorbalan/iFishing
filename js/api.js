@@ -1,45 +1,34 @@
-// ATENÇÃO: Cole aqui a URL do seu App da Web que você copiou do Google Apps Script.
+// ATENÇÃO: Verifique se esta URL é a correta da sua implantação do Apps Script.
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzeNSPQSZj3kEtcfpKIobRscIMZWSq5RM-dtQT3vRzZ4iOVRNk-Geb_58Df5D_T1lL4/exec';
 
 /**
  * Busca todos os registros de pesqueiros na planilha.
- * @returns {Promise<Array>} Uma promessa que resolve para um array de objetos de pesqueiros.
  */
 async function getPesqueiros() {
     try {
         const response = await fetch(`${SCRIPT_URL}?action=readAll`);
-        if (!response.ok) {
-            throw new Error(`Erro na requisição: ${response.statusText}`);
-        }
+        if (!response.ok) throw new Error(`Erro na requisição: ${response.statusText}`);
         const data = await response.json();
-        return data;
+        // Filtra para não mostrar pesqueiros marcados como inativos, se houver
+        return data.filter(p => p.Ativo !== 'NAO');
     } catch (error) {
         console.error("Falha ao buscar pesqueiros:", error);
-        return []; // Retorna um array vazio em caso de erro
+        return [];
     }
 }
 
 /**
- * Envia uma requisição POST para o Apps Script para criar, atualizar ou deletar um registro.
- * @param {string} action - A ação a ser executada ('create', 'update', 'delete').
- * @param {object} data - O objeto com os dados para a ação.
- * @returns {Promise<object>} A resposta do servidor.
+ * Envia uma requisição POST para o Apps Script.
  */
 async function postData(action, data) {
     try {
         const response = await fetch(SCRIPT_URL, {
             method: 'POST',
-            mode: 'cors', // Necessário para requisições entre diferentes origens
-            headers: {
-                'Content-Type': 'text/plain;charset=utf-8', // Apps Script espera text/plain para o corpo do post
-            },
-            body: JSON.stringify({ action, data }), // O corpo da requisição
+            mode: 'cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action, data }),
         });
-        
-        if (!response.ok) {
-            throw new Error(`Erro na requisição POST: ${response.statusText}`);
-        }
-        
+        if (!response.ok) throw new Error(`Erro na requisição POST: ${response.statusText}`);
         return await response.json();
     } catch (error) {
         console.error(`Falha na ação '${action}':`, error);
@@ -47,29 +36,33 @@ async function postData(action, data) {
     }
 }
 
-// Funções específicas para cada ação (Criar, Atualizar, Deletar)
-// Elas usam a função genérica postData.
+// Funções para Pesqueiros
+function createPesqueiro(data) { return postData('create', data); }
+function updatePesqueiro(data) { return postData('update', data); }
+function deletePesqueiro(id) { return postData('delete', { ID: id }); }
+
+
+// --- NOVAS FUNÇÕES PARA VISITAS ---
 
 /**
- * Cadastra um novo pesqueiro.
- * @param {object} pesqueiroData - Os dados do novo pesqueiro.
+ * Busca todas as visitas de um pesqueiro específico.
+ * @param {string} pesqueiroId O ID do pesqueiro.
  */
-function createPesqueiro(pesqueiroData) {
-    return postData('create', pesqueiroData);
+async function getVisitas(pesqueiroId) {
+    try {
+        const response = await fetch(`${SCRIPT_URL}?action=readVisitas&pesqueiroId=${pesqueiroId}`);
+        if (!response.ok) throw new Error(`Erro na requisição: ${response.statusText}`);
+        return await response.json();
+    } catch (error) {
+        console.error("Falha ao buscar visitas:", error);
+        return [];
+    }
 }
 
 /**
- * Atualiza um pesqueiro existente.
- * @param {object} pesqueiroData - Os dados do pesqueiro a serem atualizados (deve incluir o ID).
+ * Cria um novo registro de visita.
+ * @param {object} visitaData Os dados da nova visita.
  */
-function updatePesqueiro(pesqueiroData) {
-    return postData('update', pesqueiroData);
-}
-
-/**
- * "Deleta" um pesqueiro (marcando-o como inativo).
- * @param {string} id - O ID do pesqueiro a ser deletado.
- */
-function deletePesqueiro(id) {
-    return postData('delete', { ID: id });
+function createVisita(visitaData) {
+    return postData('createVisita', visitaData);
 }
