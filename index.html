@@ -6,21 +6,14 @@
     <title>Gestão de Pesqueiros</title>
     <link rel="icon" type="image/png" href="img/fishing.png">
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
     <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/Leaflet.fullscreen.min.js'></script>
     <link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/leaflet.fullscreen.css' rel='stylesheet' />
-
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body class="bg-gray-50 text-sm">
-
-    <div id="loader" class="hidden">
-        <div class="spinner"></div>
-    </div>
-
+    <div id="loader" class="hidden"><div class="spinner"></div></div>
     <header class="bg-blue-600 text-white p-3 shadow-md">
         <div class="container mx-auto flex justify-between items-center">
             <div class="flex items-center">
@@ -28,192 +21,32 @@
                 <h1 class="text-xl font-bold">Gerenciador de Pesqueiros</h1>
             </div>
             <div>
-                <a href="calendario.html" class="bg-white text-blue-600 font-semibold px-3 py-1.5 rounded hover:bg-gray-200 text-sm mr-2">
-                    Ver Calendário
-                </a>
-                <button id="add-pesqueiro-btn" class="bg-white text-blue-600 font-semibold px-3 py-1.5 rounded hover:bg-gray-200 text-sm">
-                    + Adicionar Pesqueiro
-                </button>
+                <a href="calendario.html" class="bg-white text-blue-600 font-semibold px-3 py-1.5 rounded hover:bg-gray-200 text-sm mr-2">Ver Calendário</a>
+                <button id="add-pesqueiro-btn" class="bg-white text-blue-600 font-semibold px-3 py-1.5 rounded hover:bg-gray-200 text-sm">+ Adicionar Pesqueiro</button>
             </div>
         </div>
     </header>
-
     <main class="container mx-auto p-4">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
             <section id="filters" class="bg-white p-3 rounded-lg shadow">
                 <h2 class="text-lg font-semibold mb-3">Filtros de Busca</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div class="md:col-span-2">
-                        <label for="name-filter" class="block text-xs font-medium text-gray-700">Nome ou Cidade</label>
-                        <input type="text" id="name-filter" placeholder="Digite para buscar..." class="mt-1 block w-full p-1.5 border border-gray-300 rounded-md text-sm">
-                    </div>
-                    <div>
-                        <label for="time-filter" class="block text-xs font-medium text-gray-700">Tempo de Viagem (até)</label>
-                        <select id="time-filter" class="mt-1 block w-full p-1.5 border border-gray-300 rounded-md text-sm">
-                            <option value="">Todos</option>
-                            <option value="30">30 min</option>
-                            <option value="45">45 min</option>
-                            <option value="60">60 min</option>
-                            <option value="75">75 min</option>
-                            <option value="90">90 min</option>
-                            <option value="105">105 min</option>
-                            <option value="120">120 min</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="fish-filter" class="block text-xs font-medium text-gray-700">Espécie de Peixe</label>
-                        <select id="fish-filter" class="mt-1 block w-full p-1.5 border border-gray-300 rounded-md text-sm">
-                            <option value="">Todas</option>
-                        </select>
-                    </div>
-                     <div>
-                        <label for="price-filter" class="block text-xs font-medium text-gray-700">Preço Máximo (R$)</label>
-                        <input type="number" id="price-filter" placeholder="Ex: 50" class="mt-1 block w-full p-1.5 border border-gray-300 rounded-md text-sm">
-                    </div>
-                    <div>
-                        <label for="reserve-filter" class="block text-xs font-medium text-gray-700">Aceita Reserva?</label>
-                        <select id="reserve-filter" class="mt-1 block w-full p-1.5 border border-gray-300 rounded-md text-sm">
-                            <option value="">Todos</option>
-                            <option value="Sim">Sim</option>
-                            <option value="Não">Não</option>
-                        </select>
-                    </div>
-                    <div class="md:col-span-2">
-                        <button id="reset-filters" class="mt-3 w-full bg-gray-500 text-white px-3 py-1.5 rounded hover:bg-gray-600 text-sm">Limpar Filtros</button>
-                    </div>
+                    <div class="md:col-span-2"><label for="name-filter" class="block text-xs font-medium text-gray-700">Nome ou Cidade</label><input type="text" id="name-filter" placeholder="Digite para buscar..." class="mt-1 block w-full p-1.5 border border-gray-300 rounded-md text-sm"></div>
+                    <div><label for="time-filter" class="block text-xs font-medium text-gray-700">Tempo de Viagem (até)</label><select id="time-filter" class="mt-1 block w-full p-1.5 border border-gray-300 rounded-md text-sm"><option value="">Todos</option><option value="30">30 min</option><option value="45">45 min</option><option value="60">60 min</option><option value="75">75 min</option><option value="90">90 min</option><option value="105">105 min</option><option value="120">120 min</option></select></div>
+                    <div><label for="fish-filter" class="block text-xs font-medium text-gray-700">Espécie de Peixe</label><select id="fish-filter" class="mt-1 block w-full p-1.5 border border-gray-300 rounded-md text-sm"><option value="">Todas</option></select></div>
+                    <div><label for="price-filter" class="block text-xs font-medium text-gray-700">Preço Máximo (R$)</label><input type="number" id="price-filter" placeholder="Ex: 50" class="mt-1 block w-full p-1.5 border border-gray-300 rounded-md text-sm"></div>
+                    <div><label for="reserve-filter" class="block text-xs font-medium text-gray-700">Aceita Reserva?</label><select id="reserve-filter" class="mt-1 block w-full p-1.5 border border-gray-300 rounded-md text-sm"><option value="">Todos</option><option value="Sim">Sim</option><option value="Não">Não</option></select></div>
+                    <div class="md:col-span-2"><button id="reset-filters" class="mt-3 w-full bg-gray-500 text-white px-3 py-1.5 rounded hover:bg-gray-600 text-sm">Limpar Filtros</button></div>
                 </div>
             </section>
-
-            <div id="map-container" class="bg-white p-3 rounded-lg shadow">
-                <h2 class="text-lg font-semibold mb-3">Mapa de Pesqueiros</h2>
-                <div id="map" style="height: 450px;" class="rounded"></div>
-            </div>
+            <div id="map-container" class="bg-white p-3 rounded-lg shadow"><h2 class="text-lg font-semibold mb-3">Mapa de Pesqueiros</h2><div id="map" style="height: 450px;" class="rounded"></div></div>
         </div>
-
-        <section id="table-section" class="bg-white p-3 rounded-lg shadow">
-             <h2 class="text-lg font-semibold mb-3">Lista de Pesqueiros</h2>
-            <div id="table-container" class="overflow-x-auto">
-                <table class="w-full text-sm text-left">
-                    <thead class="bg-gray-100 text-xs uppercase">
-                        <tr>
-                            <th class="p-1.5 w-10 text-center">#</th>
-                            <th class="p-1.5">Nome</th>
-                            <th class="p-1.5">Cidade/UF</th>
-                            <th class="p-1.5">Tempo</th>
-                            <th class="p-1.5">Distância</th>
-                            <th class="p-1.5">Preço</th>
-                            <th class="p-1.5">Reserva?</th>
-                            <th class="p-1.5">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="pesqueiros-table-body">
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-        <section id="timeline-section" class="bg-white p-3 rounded-lg shadow mt-4">
-            <h2 class="text-lg font-semibold mb-3">Timeline de Visitas Recentes</h2>
-            <div id="timeline-container" class="space-y-4 max-h-96 overflow-y-auto">
-                <p id="timeline-loading">Carregando timeline...</p>
-            </div>
-        </section>
+        <section id="table-section" class="bg-white p-3 rounded-lg shadow"><h2 class="text-lg font-semibold mb-3">Lista de Pesqueiros</h2><div id="table-container" class="overflow-x-auto"><table class="w-full text-sm text-left"><thead class="bg-gray-100 text-xs uppercase"><tr><th class="p-1.5 w-10 text-center">#</th><th class="p-1.5">Nome</th><th class="p-1.5">Cidade/UF</th><th class="p-1.5">Tempo</th><th class="p-1.5">Distância</th><th class="p-1.5">Preço</th><th class="p-1.5">Reserva?</th><th class="p-1.5">Ações</th></tr></thead><tbody id="pesqueiros-table-body"></tbody></table></div></section>
+        <section id="timeline-section" class="bg-white p-3 rounded-lg shadow mt-4"><h2 class="text-lg font-semibold mb-3">Timeline de Visitas Recentes</h2><div id="timeline-container" class="space-y-4 max-h-96 overflow-y-auto"><p id="timeline-loading">Carregando timeline...</p></div></section>
     </main>
-    
-    <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center p-4 z-50">
-        <div class="modal-bg fixed inset-0"></div>
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl z-10 max-h-[90vh] flex flex-col">
-            <div class="p-4 border-b flex justify-between items-center">
-                <h2 id="modal-title" class="text-2xl font-semibold"></h2>
-                <button class="modal-close-btn text-gray-500 hover:text-gray-800 text-3xl">×</button>
-            </div>
-            
-            <div id="form-content" class="p-6 overflow-y-auto hidden">
-                <form id="pesqueiro-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input type="hidden" id="ID" name="ID">
-                    <div>
-                        <label for="NomePesqueiro" class="block text-sm font-medium text-gray-700">Nome do Pesqueiro</label>
-                        <input type="text" name="NomePesqueiro" id="NomePesqueiro" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
-                    </div>
-                    <div>
-                        <label for="CidadeUF" class="block text-sm font-medium text-gray-700">Cidade/UF</label>
-                        <input type="text" name="CidadeUF" id="CidadeUF" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
-                    </div>
-                    <div>
-                        <label for="TempoSemTransito" class="block text-sm font-medium text-gray-700">Tempo sem Trânsito (min)</label>
-                        <input type="number" name="TempoSemTransito" id="TempoSemTransito" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
-                    </div>
-                    <div>
-                        <label for="Distancia" class="block text-sm font-medium text-gray-700">Distância (km)</label>
-                        <input type="number" step="0.1" name="Distancia" id="Distancia" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
-                    </div>
-                    <div>
-                        <label for="PrecoMedio" class="block text-sm font-medium text-gray-700">Preço Médio (R$)</label>
-                        <input type="number" step="0.01" name="PrecoMedio" id="PrecoMedio" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
-                    </div>
-                    <div>
-                        <label for="AceitaReserva" class="block text-sm font-medium text-gray-700">Aceita Reserva?</label>
-                        <select name="AceitaReserva" id="AceitaReserva" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
-                            <option>Não</option>
-                            <option>Sim</option>
-                        </select>
-                    </div>
-                    <div class="md:col-span-2">
-                        <label for="Peixes" class="block text-sm font-medium text-gray-700">Peixes mais capturados (separados por vírgula)</label>
-                        <input type="text" name="Peixes" id="Peixes" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
-                    </div>
-                    <div class="md:col-span-2">
-                        <label for="EnderecoCompleto" class="block text-sm font-medium text-gray-700">Endereço Completo</label>
-                        <input type="text" name="EnderecoCompleto" id="EnderecoCompleto" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
-                    </div>
-                    <div>
-                        <label for="Latitude" class="block text-sm font-medium text-gray-700">Latitude</label>
-                        <input type="text" name="Latitude" id="Latitude" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
-                    </div>
-                    <div>
-                        <label for="Longitude" class="block text-sm font-medium text-gray-700">Longitude</label>
-                        <input type="text" name="Longitude" id="Longitude" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
-                    </div>
-                    <div>
-                        <label for="Telefone" class="block text-sm font-medium text-gray-700">Telefone / WhatsApp</label>
-                        <input type="tel" name="Telefone" id="Telefone" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
-                    </div>
-                    <div class="md:col-span-2 grid grid-cols-2 gap-4">
-                        <div>
-                            <label for="Site" class="block text-sm font-medium text-gray-700">Site (URL)</label>
-                            <input type="url" name="Site" id="Site" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
-                        </div>
-                        <div>
-                            <label for="Instagram" class="block text-sm font-medium text-gray-700">Instagram (URL)</label>
-                            <input type="url" name="Instagram" id="Instagram" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
-                        </div>
-                    </div>
-                    <div class="md:col-span-2 text-right">
-                        <button type="submit" class="bg-blue-600 text-white font-semibold px-6 py-2 rounded hover:bg-blue-700">Salvar</button>
-                    </div>
-                </form>
-            </div>
-
-            <div id="details-content" class="p-6 overflow-y-auto">
-                <div id="pesqueiro-details-container" class="pb-4 mb-4 border-b"></div>
-                <div class="border-b border-gray-200">
-                    <nav class="-mb-px flex space-x-8" aria-label="Tabs">
-                        <a href="#" id="tab-historico" class="border-blue-500 text-blue-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Histórico de Visitas</a>
-                        <a href="#" id="tab-registrar" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Registrar Nova Visita</a>
-                    </nav>
-                </div>
-                <div id="content-historico" class="mt-6">
-                    <p id="historico-empty-state" class="text-gray-500">Nenhuma visita registrada.</p>
-                    <div id="visitas-list" class="space-y-4"></div>
-                </div>
-                <div id="content-registrar" class="hidden mt-6">
-                    <form id="visita-form">
-                        <input type="hidden" id="visita-pesqueiro-id" name="PesqueiroID">
-                        <div class="grid grid-cols-1 gap-6">
-                            <div>
-                                <label for="DataVisita" class="block text-sm font-medium text-gray-700">Data da Visita</label>
-                                <input type="date" name="DataVisita" id="DataVisita" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
-                            </div>
-                            <div>
-                                <label for="PeixesCapturados" class="block text-sm font-medium text-gray-700">Peixes Capturados</label>
-                                <textarea name="PeixesCapturados"
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center p-4 z-50"><div class="modal-bg fixed inset-0"></div><div class="bg-white rounded-lg shadow-xl w-full max-w-3xl z-10 max-h-[90vh] flex flex-col"><div class="p-4 border-b flex justify-between items-center"><h2 id="modal-title" class="text-2xl font-semibold"></h2><button class="modal-close-btn text-gray-500 hover:text-gray-800 text-3xl">×</button></div><div id="form-content" class="p-6 overflow-y-auto hidden"><form id="pesqueiro-form" class="grid grid-cols-1 md:grid-cols-2 gap-4"><input type="hidden" id="ID" name="ID"><div><label for="NomePesqueiro" class="block text-sm font-medium text-gray-700">Nome do Pesqueiro</label><input type="text" name="NomePesqueiro" id="NomePesqueiro" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required></div><div><label for="CidadeUF" class="block text-sm font-medium text-gray-700">Cidade/UF</label><input type="text" name="CidadeUF" id="CidadeUF" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></div><div><label for="TempoSemTransito" class="block text-sm font-medium text-gray-700">Tempo sem Trânsito (min)</label><input type="number" name="TempoSemTransito" id="TempoSemTransito" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></div><div><label for="Distancia" class="block text-sm font-medium text-gray-700">Distância (km)</label><input type="number" step="0.1" name="Distancia" id="Distancia" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></div><div><label for="PrecoMedio" class="block text-sm font-medium text-gray-700">Preço Médio (R$)</label><input type="number" step="0.01" name="PrecoMedio" id="PrecoMedio" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></div><div><label for="AceitaReserva" class="block text-sm font-medium text-gray-700">Aceita Reserva?</label><select name="AceitaReserva" id="AceitaReserva" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"><option>Não</option><option>Sim</option></select></div><div class="md:col-span-2"><label for="Peixes" class="block text-sm font-medium text-gray-700">Peixes mais capturados (separados por vírgula)</label><input type="text" name="Peixes" id="Peixes" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></div><div class="md:col-span-2"><label for="EnderecoCompleto" class="block text-sm font-medium text-gray-700">Endereço Completo</label><input type="text" name="EnderecoCompleto" id="EnderecoCompleto" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></div><div><label for="Latitude" class="block text-sm font-medium text-gray-700">Latitude</label><input type="text" name="Latitude" id="Latitude" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></div><div><label for="Longitude" class="block text-sm font-medium text-gray-700">Longitude</label><input type="text" name="Longitude" id="Longitude" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></div><div><label for="Telefone" class="block text-sm font-medium text-gray-700">Telefone / WhatsApp</label><input type="tel" name="Telefone" id="Telefone" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></div><div class="md:col-span-2 grid grid-cols-2 gap-4"><div><label for="Site" class="block text-sm font-medium text-gray-700">Site (URL)</label><input type="url" name="Site" id="Site" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></div><div><label for="Instagram" class="block text-sm font-medium text-gray-700">Instagram (URL)</label><input type="url" name="Instagram" id="Instagram" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></div></div><div class="md:col-span-2 text-right"><button type="submit" class="bg-blue-600 text-white font-semibold px-6 py-2 rounded hover:bg-blue-700">Salvar</button></div></form></div><div id="details-content" class="p-6 overflow-y-auto"><div id="pesqueiro-details-container" class="pb-4 mb-4 border-b"></div><div class="border-b border-gray-200"><nav class="-mb-px flex space-x-8" aria-label="Tabs"><a href="#" id="tab-historico" class="border-blue-500 text-blue-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Histórico de Visitas</a><a href="#" id="tab-registrar" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Registrar Nova Visita</a></nav></div><div id="content-historico" class="mt-6"><p id="historico-empty-state" class="text-gray-500">Nenhuma visita registrada.</p><div id="visitas-list" class="space-y-4"></div></div><div id="content-registrar" class="hidden mt-6"><form id="visita-form"><input type="hidden" id="visita-pesqueiro-id" name="PesqueiroID"><div class="grid grid-cols-1 gap-6"><div><label for="DataVisita" class="block text-sm font-medium text-gray-700">Data da Visita</label><input type="date" name="DataVisita" id="DataVisita" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required></div><div><label for="PeixesCapturados" class="block text-sm font-medium text-gray-700">Peixes Capturados</label><textarea name="PeixesCapturados" id="PeixesCapturados" rows="3" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" placeholder="Ex: Tilápia, 5, 1.5kg..."></textarea></div><div><label for="Observacoes" class="block text-sm font-medium text-gray-700">Observações</label><textarea name="Observacoes" id="Observacoes" rows="4" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" placeholder="Ex: Dia ensolarado..."></textarea></div></div><div class="pt-5 text-right"><button type="submit" class="bg-blue-600 text-white font-semibold px-6 py-2 rounded hover:bg-blue-700">Salvar Visita</button></div></form></div></div></div></div>
+    <div id="confirm-delete-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center p-4 z-50"><div class="bg-white rounded-lg shadow-xl w-full max-w-md"><div class="p-6 text-center"><svg class="mx-auto mb-4 w-14 h-14 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><h3 class="mb-5 text-lg font-normal text-gray-500">Você tem certeza que deseja excluir o pesqueiro <br> <strong id="pesqueiro-to-delete-name" class="text-gray-800"></strong>?</h3><button id="btn-confirm-delete" class="text-white bg-red-600 hover:bg-red-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2">Sim, tenho certeza</button><button id="btn-cancel-delete" class="text-gray-500 bg-white hover:bg-gray-100 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900">Não, cancelar</button></div></div></div>
+    <script src="js/api.js"></script><script src="js/map.js"></script><script src="js/ui.js"></script>
+    <script>document.addEventListener('DOMContentLoaded', function() { initMap('map'); });</script>
+</body>
+</html>
