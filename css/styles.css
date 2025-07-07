@@ -11,7 +11,6 @@
     justify-content: center;
     align-items: center;
 }
-
 .spinner {
     border: 8px solid #f3f3f3;
     border-top: 8px solid #3498db;
@@ -20,26 +19,17 @@
     height: 60px;
     animation: spin 1s linear infinite;
 }
-
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
-
-/* Garante que o modal fique na camada superior absoluta */
 #modal {
     z-index: 9999 !important;
 }
-
-/* Força o container do mapa a ter um contexto de empilhamento de baixa prioridade */
 #map-container {
     position: relative;
     z-index: 0;
 }
-
-/* --- ESTILOS FINAIS PARA MARCADOR SVG E NOVO POPUP --- */
-
-/* Container que segura o SVG e o número */
 .svg-marker-container {
     position: relative;
     cursor: pointer;
@@ -47,8 +37,6 @@
     justify-content: center;
     align-items: center;
 }
-
-/* Estilo para o número que fica sobre o pino */
 .marker-number {
     position: absolute;
     top: 13px;
@@ -59,8 +47,6 @@
     font-weight: bold;
     text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
 }
-
-/* Customização do container do popup do Leaflet */
 .custom-popup .leaflet-popup-content-wrapper {
     background: #ffffff;
     border-radius: 8px;
@@ -68,49 +54,40 @@
     box-shadow: 0 3px 15px rgba(0,0,0,0.2);
     border: 1px solid #ddd;
 }
-
 .custom-popup .leaflet-popup-content {
     margin: 0 !important;
     padding: 15px;
     min-width: 250px;
     font-family: sans-serif;
 }
-
-/* NOVO ESTILO PARA O CONTEÚDO DO POPUP */
-
 .popup-main-content {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px; /* Espaço entre o header e os botões */
+    gap: 12px;
 }
-
 .popup-header {
     text-align: center;
     width: 100%;
     border-bottom: 1px solid #eee;
     padding-bottom: 10px;
 }
-
 .popup-header h5 {
     font-size: 18px;
     font-weight: bold;
     color: #333;
     margin: 0;
 }
-
 .popup-header p {
     font-size: 13px;
     color: #777;
     margin: 2px 0 0 0;
 }
-
 .popup-actions {
     display: flex;
     justify-content: space-around;
     width: 100%;
 }
-
 .action-button {
     display: flex;
     flex-direction: column;
@@ -121,11 +98,9 @@
     font-size: 12px;
     transition: transform 0.2s ease;
 }
-
 .action-button:hover {
-    transform: scale(1.1); /* Efeito de zoom ao passar o mouse */
+    transform: scale(1.1);
 }
-
 .action-button img {
     width: 40px;
     height: 40px;
