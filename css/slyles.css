@@ -37,28 +37,23 @@
     z-index: 0;
 }
 
-/* --- NOVO ESTILO PARA O ALFINETE NUMERADO --- */
-.numbered-pin-marker {
-    width: 32px;
-    height: 32px;
-    border-radius: 50% 50% 50% 0;
-    background: #c32b2b; /* Cor padrão */
-    position: absolute;
-    transform: rotate(-45deg);
-    border: 2px solid white;
-    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+
+/* --- NOVOS ESTILOS PARA MARCADORES SVG --- */
+
+/* Container que segura o SVG e o número */
+.svg-marker-container {
+    position: relative; /* Essencial para posicionar o número sobre o SVG */
     cursor: pointer;
-    
-    /* Centraliza o número dentro do pino */
-    display: flex;
-    justify-content: center;
-    align-items: center;
 }
 
-/* O número dentro do pino */
-.numbered-pin-marker span {
+/* Estilo para o número que fica sobre o pino */
+.marker-number {
+    position: absolute;
+    top: 13px; /* Ajuste fino da posição vertical do número */
+    left: 50%; /* Centraliza horizontalmente */
+    transform: translateX(-50%);
     color: white;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: bold;
-    transform: rotate(45deg); /* Desfaz a rotação do pino para o número ficar reto */
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5); /* Sombra para melhorar a leitura */
 }

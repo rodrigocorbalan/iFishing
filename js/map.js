@@ -26,7 +26,7 @@ function clearMarkers() {
 }
 
 /**
- * Adiciona marcadores de pino numerado e colorido ao mapa.
+ * Adiciona marcadores SVG (pino numerado) ao mapa.
  */
 function addMarkersToMap(pesqueiros, onMarkerClick) {
     clearMarkers(); // Limpa os marcadores antigos
@@ -40,16 +40,24 @@ function addMarkersToMap(pesqueiros, onMarkerClick) {
 
             const pinColor = colors[index % colors.length];
 
-            // Cria um ícone customizado usando L.divIcon com o novo estilo
-            const numberedPinIcon = L.divIcon({
-                className: '', // Não precisa de classe wrapper, o estilo está no HTML interno
-                html: `<div class="numbered-pin-marker" style="background-color: ${pinColor};"><span>${index + 1}</span></div>`,
+            // Cria um ícone customizado usando L.divIcon e SVG
+            const svgPinIcon = L.divIcon({
+                className: '', // Não precisa de classe wrapper
+                html: `
+                    <div class="svg-marker-container">
+                        <svg width="32" height="32" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                            <path fill="${pinColor}" d="M172.268 501.67C26.97 291.031 0 269.413 0 192 0 85.961 85.961 0 192 0s192 85.961 192 192c0 77.413-26.97 99.031-172.268 309.67a24 24 0 01-35.464 0z"></path>
+                            <circle cx="192" cy="192" r="64" fill="white"></circle>
+                        </svg>
+                        <span class="marker-number">${index + 1}</span>
+                    </div>
+                `,
                 iconSize: [32, 32],
-                iconAnchor: [16, 32], // Ancoragem na ponta inferior do pino
-                popupAnchor: [0, -32] // Popup abre um pouco acima do pino
+                iconAnchor: [16, 32],
+                popupAnchor: [0, -32]
             });
 
-            const marker = L.marker([lat, lng], { icon: numberedPinIcon }).addTo(map);
+            const marker = L.marker([lat, lng], { icon: svgPinIcon }).addTo(map);
 
             const popupContent = `
                 <b>${index + 1}. ${p.NomePesqueiro}</b><br>
@@ -65,14 +73,14 @@ function addMarkersToMap(pesqueiros, onMarkerClick) {
         }
     });
 
-    // Adiciona um listener para os links de "Ver mais detalhes" dentro dos popups
-    // Usamos um timeout para garantir que o popup foi adicionado ao DOM
+    // Adiciona listener para os links de "Ver mais detalhes" dentro dos popups
     setTimeout(() => {
         document.querySelectorAll('.details-link').forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
                 const id = e.target.getAttribute('data-id');
                 if (id) {
+                    map.closePopup(); // Fecha o popup antes de abrir o modal
                     showDetailsModal(id);
                 }
             });
