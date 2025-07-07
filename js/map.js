@@ -47,7 +47,7 @@ function clearMarkers() {
 }
 
 /**
- * Adiciona marcadores de pesqueiros ao mapa.
+ * Adiciona marcadores SVG numerados ao mapa, com tooltip e popup.
  */
 function addMarkersToMap(pesqueiros, onMarkerClick) {
     clearMarkers();
@@ -77,7 +77,16 @@ function addMarkersToMap(pesqueiros, onMarkerClick) {
             });
 
             const marker = L.marker([lat, lng], { icon: svgPinIcon }).addTo(map);
+
+            // Adiciona o Tooltip que aparece ao passar o mouse
+            marker.bindTooltip(p.NomePesqueiro, {
+                permanent: false,
+                direction: 'top',
+                offset: [0, -35],
+                className: 'custom-tooltip'
+            });
             
+            // Adiciona o Popup que aparece ao clicar
             const popupContent = `
                 <div class="popup-main-content">
                     <div class="popup-header">
@@ -85,7 +94,7 @@ function addMarkersToMap(pesqueiros, onMarkerClick) {
                         <p>${p.CidadeUF}</p>
                     </div>
                     <div class="popup-actions">
-                        <a href="http://googleusercontent.com/maps.google.com/5{lat},${lng}" target="_blank" class="action-button">
+                        <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}" target="_blank" class="action-button">
                             <img src="img/icon_gmaps.svg" alt="Google Maps">
                             <span>Google Maps</span>
                         </a>
@@ -100,9 +109,9 @@ function addMarkersToMap(pesqueiros, onMarkerClick) {
                     </div>
                 </div>
             `;
-            
             marker.bindPopup(popupContent, { className: 'custom-popup' });
 
+            // Adiciona o evento de clique para o link "Ver mais detalhes"
             marker.on('popupopen', (e) => {
                 const popup = e.popup;
                 const link = popup.getElement().querySelector('.details-link');
