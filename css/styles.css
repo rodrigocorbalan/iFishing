@@ -43,7 +43,6 @@
 .marker-with-label-container {
     display: flex;
     align-items: center;
-    /* Remove o fundo e borda padrão que o Leaflet aplica a divIcons */
     background: transparent;
     border: none;
     cursor: pointer;
@@ -62,12 +61,12 @@
     border-radius: 4px;
     box-shadow: 0 1px 4px rgba(0,0,0,0.4); /* Cria o efeito de "moldura" com sombra */
     color: #333;
-    font-size: 13px;
+    font-size: 11px; /* <<< FONTE DIMINUÍDA DE 13px PARA 11px */
     font-weight: bold;
     white-space: nowrap; /* Impede que o nome quebre em várias linhas */
 }
 
-/* --- ESTILOS PARA O POPUP CUSTOMIZADO (continua o mesmo) --- */
+/* --- ESTILOS PARA O POPUP CUSTOMIZADO --- */
 .custom-popup .leaflet-popup-content-wrapper {
     background: #ffffff;
     border-radius: 8px;
