@@ -3,23 +3,38 @@ let todosOsPesqueiros = [];
 let pesqueirosFiltrados = [];
 let pesqueiroIdToDelete = null;
 
+/**
+ * Função principal que inicializa a UI, agora também carregando a timeline.
+ */
 async function initUI() {
     showLoading(true);
     try {
-        todosOsPesqueiros = await getPesqueiros();
+        // Carrega os pesqueiros e as visitas em paralelo para mais performance
+        const [pesqueiros, visitas] = await Promise.all([
+            getPesqueiros(),
+            getAllVisitas() // Nova chamada para buscar todas as visitas
+        ]);
+
+        todosOsPesqueiros = pesqueiros;
         pesqueirosFiltrados = [...todosOsPesqueiros];
+        
         renderTable(pesqueirosFiltrados);
         addMarkersToMap(pesqueirosFiltrados, (id, nome) => showDetailsModal(id, nome));
         populateFishFilter(todosOsPesqueiros);
+        renderTimeline(visitas); // Renderiza a nova timeline
         setupEventListeners();
+
     } catch (error) {
         console.error("Falha fatal na inicialização da UI:", error);
-        alert("Ocorreu um erro grave ao carregar a aplicação. Verifique o console para mais detalhes.");
+        alert("Ocorreu um erro grave ao carregar a aplicação.");
     } finally {
         showLoading(false);
     }
 }
 
+/**
+ * Renderiza a tabela de pesqueiros com botões de ação estilizados.
+ */
 function renderTable(pesqueiros) {
     const tableBody = document.getElementById('pesqueiros-table-body');
     tableBody.innerHTML = '';
@@ -50,6 +65,9 @@ function renderTable(pesqueiros) {
     });
 }
 
+/**
+ * Popula o filtro de espécies de peixes.
+ */
 function populateFishFilter(pesqueiros) {
     const fishFilter = document.getElementById('fish-filter');
     const allFish = new Set();
@@ -72,6 +90,9 @@ function populateFishFilter(pesqueiros) {
     });
 }
 
+/**
+ * Aplica os filtros e atualiza a UI.
+ */
 function applyFilters() {
     const nameFilterValue = document.getElementById('name-filter').value.toLowerCase();
     const timeFilterValue = document.getElementById('time-filter').value;
@@ -90,6 +111,9 @@ function applyFilters() {
     addMarkersToMap(pesqueirosFiltrados, (id, nome) => showDetailsModal(id, nome));
 }
 
+/**
+ * Configura todos os listeners de eventos da página.
+ */
 function setupEventListeners() {
     document.getElementById('name-filter').addEventListener('input', applyFilters);
     document.getElementById('price-filter').addEventListener('input', applyFilters);
@@ -140,34 +164,8 @@ function setupEventListeners() {
     document.getElementById('btn-confirm-delete').addEventListener('click', () => {
         if (pesqueiroIdToDelete) handleDelete(pesqueiroIdToDelete);
     });
-
-    const tabHistorico = document.getElementById('tab-historico');
-    const tabRegistrar = document.getElementById('tab-registrar');
-    const contentHistorico = document.getElementById('content-historico');
-    const contentRegistrar = document.getElementById('content-registrar');
     
-    tabHistorico.addEventListener('click', e => {
-        e.preventDefault();
-        tabHistorico.classList.add('border-blue-500', 'text-blue-600');
-        tabHistorico.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
-        tabRegistrar.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
-        tabRegistrar.classList.remove('border-blue-500', 'text-blue-600');
-        contentHistorico.classList.remove('hidden');
-        contentRegistrar.classList.add('hidden');
-    });
-
-    tabRegistrar.addEventListener('click', e => {
-        e.preventDefault();
-        tabRegistrar.classList.add('border-blue-500', 'text-blue-600');
-        tabRegistrar.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
-        tabHistorico.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
-        tabHistorico.classList.remove('border-blue-500', 'text-blue-600');
-        contentRegistrar.classList.remove('hidden');
-        contentHistorico.classList.add('hidden');
-    });
-
-    document.getElementById('visita-form').addEventListener('submit', handleVisitaFormSubmit);
-    
+    // Listener de geocoding
     const addressInput = document.getElementById('EnderecoCompleto');
     addressInput.addEventListener('blur', async (e) => {
         const address = e.target.value;
@@ -187,6 +185,38 @@ function setupEventListeners() {
         }
     });
 }
+
+/**
+ * Renderiza a timeline de visitas na página inicial.
+ */
+function renderTimeline(visitas) {
+    const container = document.getElementById('timeline-container');
+    const loadingEl = document.getElementById('timeline-loading');
+    container.innerHTML = ''; // Limpa o container
+
+    if (visitas.length === 0) {
+        container.innerHTML = '<p class="text-gray-500">Nenhuma visita registrada para exibir na timeline.</p>';
+        return;
+    }
+
+    visitas.sort((a, b) => new Date(b.DataVisita) - new Date(a.DataVisita));
+    const visitasRecentes = visitas.slice(0, 10);
+
+    visitasRecentes.forEach(visita => {
+        const dataFormatada = new Date(visita.DataVisita).toLocaleDateString('pt-BR', {day: '2-digit', month: 'long', year: 'numeric', timeZone: 'UTC' });
+        const timelineItem = document.createElement('div');
+        timelineItem.className = 'timeline-item';
+        timelineItem.innerHTML = `
+            <div>
+                <p class="font-bold text-base text-gray-800">${visita.PesqueiroNome || 'Visita'}</p>
+                <time class="text-xs text-gray-500">${dataFormatada}</time>
+                <p class="mt-2 text-gray-700">${visita.Observacoes || 'Sem observações.'}</p>
+            </div>
+        `;
+        container.appendChild(timelineItem);
+    });
+}
+
 
 function showLoading(isLoading) {
     document.getElementById('loader').style.display = isLoading ? 'flex' : 'none';

@@ -6,10 +6,13 @@
     <title>Gestão de Pesqueiros</title>
     <link rel="icon" type="image/png" href="img/fishing.png">
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
     <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/Leaflet.fullscreen.min.js'></script>
     <link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/leaflet.fullscreen.css' rel='stylesheet' />
+
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body class="bg-gray-50 text-sm">
@@ -108,18 +111,109 @@
                 </table>
             </div>
         </section>
+
+        <section id="timeline-section" class="bg-white p-3 rounded-lg shadow mt-4">
+            <h2 class="text-lg font-semibold mb-3">Timeline de Visitas Recentes</h2>
+            <div id="timeline-container" class="space-y-4 max-h-96 overflow-y-auto">
+                <p id="timeline-loading">Carregando timeline...</p>
+            </div>
+        </section>
     </main>
     
-    <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center p-4 z-50"> ... </div>
-    <div id="confirm-delete-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center p-4 z-50"> ... </div>
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center p-4 z-50">
+        <div class="modal-bg fixed inset-0"></div>
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl z-10 max-h-[90vh] flex flex-col">
+            <div class="p-4 border-b flex justify-between items-center">
+                <h2 id="modal-title" class="text-2xl font-semibold"></h2>
+                <button class="modal-close-btn text-gray-500 hover:text-gray-800 text-3xl">×</button>
+            </div>
+            
+            <div id="form-content" class="p-6 overflow-y-auto hidden">
+                <form id="pesqueiro-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="hidden" id="ID" name="ID">
+                    <div>
+                        <label for="NomePesqueiro" class="block text-sm font-medium text-gray-700">Nome do Pesqueiro</label>
+                        <input type="text" name="NomePesqueiro" id="NomePesqueiro" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
+                    </div>
+                    <div>
+                        <label for="CidadeUF" class="block text-sm font-medium text-gray-700">Cidade/UF</label>
+                        <input type="text" name="CidadeUF" id="CidadeUF" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                    </div>
+                    <div>
+                        <label for="TempoSemTransito" class="block text-sm font-medium text-gray-700">Tempo sem Trânsito (min)</label>
+                        <input type="number" name="TempoSemTransito" id="TempoSemTransito" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                    </div>
+                    <div>
+                        <label for="Distancia" class="block text-sm font-medium text-gray-700">Distância (km)</label>
+                        <input type="number" step="0.1" name="Distancia" id="Distancia" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                    </div>
+                    <div>
+                        <label for="PrecoMedio" class="block text-sm font-medium text-gray-700">Preço Médio (R$)</label>
+                        <input type="number" step="0.01" name="PrecoMedio" id="PrecoMedio" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                    </div>
+                    <div>
+                        <label for="AceitaReserva" class="block text-sm font-medium text-gray-700">Aceita Reserva?</label>
+                        <select name="AceitaReserva" id="AceitaReserva" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                            <option>Não</option>
+                            <option>Sim</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label for="Peixes" class="block text-sm font-medium text-gray-700">Peixes mais capturados (separados por vírgula)</label>
+                        <input type="text" name="Peixes" id="Peixes" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label for="EnderecoCompleto" class="block text-sm font-medium text-gray-700">Endereço Completo</label>
+                        <input type="text" name="EnderecoCompleto" id="EnderecoCompleto" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                    </div>
+                    <div>
+                        <label for="Latitude" class="block text-sm font-medium text-gray-700">Latitude</label>
+                        <input type="text" name="Latitude" id="Latitude" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                    </div>
+                    <div>
+                        <label for="Longitude" class="block text-sm font-medium text-gray-700">Longitude</label>
+                        <input type="text" name="Longitude" id="Longitude" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                    </div>
+                    <div>
+                        <label for="Telefone" class="block text-sm font-medium text-gray-700">Telefone / WhatsApp</label>
+                        <input type="tel" name="Telefone" id="Telefone" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                    </div>
+                    <div class="md:col-span-2 grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="Site" class="block text-sm font-medium text-gray-700">Site (URL)</label>
+                            <input type="url" name="Site" id="Site" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                        <div>
+                            <label for="Instagram" class="block text-sm font-medium text-gray-700">Instagram (URL)</label>
+                            <input type="url" name="Instagram" id="Instagram" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                    </div>
+                    <div class="md:col-span-2 text-right">
+                        <button type="submit" class="bg-blue-600 text-white font-semibold px-6 py-2 rounded hover:bg-blue-700">Salvar</button>
+                    </div>
+                </form>
+            </div>
 
-    <script src="js/api.js"></script>
-    <script src="js/map.js"></script>
-    <script src="js/ui.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            initMap('map');
-        });
-    </script>
-</body>
-</html>
+            <div id="details-content" class="p-6 overflow-y-auto">
+                <div id="pesqueiro-details-container" class="pb-4 mb-4 border-b"></div>
+                <div class="border-b border-gray-200">
+                    <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                        <a href="#" id="tab-historico" class="border-blue-500 text-blue-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Histórico de Visitas</a>
+                        <a href="#" id="tab-registrar" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Registrar Nova Visita</a>
+                    </nav>
+                </div>
+                <div id="content-historico" class="mt-6">
+                    <p id="historico-empty-state" class="text-gray-500">Nenhuma visita registrada.</p>
+                    <div id="visitas-list" class="space-y-4"></div>
+                </div>
+                <div id="content-registrar" class="hidden mt-6">
+                    <form id="visita-form">
+                        <input type="hidden" id="visita-pesqueiro-id" name="PesqueiroID">
+                        <div class="grid grid-cols-1 gap-6">
+                            <div>
+                                <label for="DataVisita" class="block text-sm font-medium text-gray-700">Data da Visita</label>
+                                <input type="date" name="DataVisita" id="DataVisita" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
+                            </div>
+                            <div>
+                                <label for="PeixesCapturados" class="block text-sm font-medium text-gray-700">Peixes Capturados</label>
+                                <textarea name="PeixesCapturados"
