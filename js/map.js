@@ -45,9 +45,8 @@ function addMarkersToMap(pesqueiros, onMarkerClick) {
                 className: '', // Não precisa de classe wrapper
                 html: `
                     <div class="custom-pin-label-marker">
-                        <svg width="32" height="32" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                        <svg width="40" height="40" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
                             <path fill="${pinColor}" d="M172.268 501.67C26.97 291.031 0 269.413 0 192 0 85.961 85.961 0 192 0s192 85.961 192 192c0 77.413-26.97 99.031-172.268 309.67a24 24 0 01-35.464 0z"></path>
-                            <circle cx="192" cy="192" r="64" fill="white"></circle>
                         </svg>
                         <div class="marker-label-box" style="border-color: ${pinColor};">
                             ${p.NomePesqueiro}
@@ -55,8 +54,8 @@ function addMarkersToMap(pesqueiros, onMarkerClick) {
                     </div>
                 `,
                 iconSize: null, // Tamanho será definido pelo conteúdo
-                iconAnchor: [16, 32], // Ancoragem na ponta inferior do pino
-                popupAnchor: [0, -32] // Posição de onde o popup deve abrir
+                iconAnchor: [20, 40], // Ancoragem na ponta inferior do pino
+                popupAnchor: [0, -35] // Posição de onde o popup deve abrir
             });
 
             const marker = L.marker([lat, lng], { icon: customIcon }).addTo(map);
@@ -66,7 +65,7 @@ function addMarkersToMap(pesqueiros, onMarkerClick) {
                     <b>${p.NomePesqueiro}</b><br>
                     <small>${p.CidadeUF}</small>
                     <hr style="margin: 5px 0;">
-                    <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}" target="_blank" style="color: #4285F4;">Rota com Google Maps</a><br>
+                    <a href="https://www.google.com/maps/dir/?api=1&destination=$${lat},${lng}" target="_blank" style="color: #4285F4;">Rota com Google Maps</a><br>
                     <a href="https://waze.com/ul?ll=${lat},${lng}&navigate=yes" target="_blank" style="color: #33ccff;">Rota com Waze</a><br>
                     <a href="#" class="details-link" data-id="${p.ID}" style="color: #0056b3; font-weight: bold;">Ver mais detalhes</a>
                 </div>
