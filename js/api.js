@@ -66,3 +66,20 @@ async function getVisitas(pesqueiroId) {
 function createVisita(visitaData) {
     return postData('createVisita', visitaData);
 }
+
+// ... (código existente do api.js)
+
+/**
+ * --- NOVA FUNÇÃO ---
+ * Busca todas as visitas de todos os pesqueiros.
+ */
+async function getAllVisitas() {
+    try {
+        const response = await fetch(`${SCRIPT_URL}?action=readAllVisitas`);
+        if (!response.ok) throw new Error(`Erro na requisição: ${response.statusText}`);
+        return await response.json();
+    } catch (error) {
+        console.error("Falha ao buscar todas as visitas:", error);
+        return [];
+    }
+}

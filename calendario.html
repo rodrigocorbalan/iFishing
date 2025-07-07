@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendário de Visitas - Gestão de Pesqueiros</title>
+    <link rel="icon" type="image/png" href="img/fishing.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        /* Estilos para o calendário */
+        #calendar {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 0 10px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-sm">
+
+    <header class="bg-blue-600 text-white p-3 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center">
+                <img src="img/fishing.png" alt="Ícone de peixe" class="h-7 w-7 mr-2">
+                <h1 class="text-xl font-bold">Calendário de Visitas</h1>
+            </div>
+            <a href="index.html" class="bg-white text-blue-600 font-semibold px-3 py-1.5 rounded hover:bg-gray-200 text-sm">
+                Voltar à Lista
+            </a>
+        </div>
+    </header>
+
+    <main>
+        <div id='calendar'></div>
+    </main>
+
+    <script src="js/api.js"></script>
+    <script src="js/calendario.js"></script>
+</body>
+</html>
