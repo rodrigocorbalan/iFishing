@@ -1,6 +1,8 @@
 // ATENÇÃO: Verifique se esta URL é a correta da sua implantação do Apps Script.
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzeNSPQSZj3kEtcfpKIobRscIMZWSq5RM-dtQT3vRzZ4iOVRNk-Geb_58Df5D_T1lL4/exec';
 
+// --- FUNÇÕES PARA PESQUEIROS ---
+
 /**
  * Busca todos os registros de pesqueiros na planilha.
  */
@@ -17,32 +19,12 @@ async function getPesqueiros() {
     }
 }
 
-/**
- * Envia uma requisição POST para o Apps Script.
- */
-async function postData(action, data) {
-    try {
-        const response = await fetch(SCRIPT_URL, {
-            method: 'POST',
-            mode: 'cors',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({ action, data }),
-        });
-        if (!response.ok) throw new Error(`Erro na requisição POST: ${response.statusText}`);
-        return await response.json();
-    } catch (error) {
-        console.error(`Falha na ação '${action}':`, error);
-        return { status: 'error', message: error.message };
-    }
-}
-
-// Funções para Pesqueiros
 function createPesqueiro(data) { return postData('create', data); }
 function updatePesqueiro(data) { return postData('update', data); }
 function deletePesqueiro(id) { return postData('delete', { ID: id }); }
 
 
-// --- NOVAS FUNÇÕES PARA VISITAS ---
+// --- FUNÇÕES PARA VISITAS ---
 
 /**
  * Busca todas as visitas de um pesqueiro específico.
@@ -67,11 +49,8 @@ function createVisita(visitaData) {
     return postData('createVisita', visitaData);
 }
 
-// ... (código existente do api.js)
-
 /**
- * --- NOVA FUNÇÃO ---
- * Busca todas as visitas de todos os pesqueiros.
+ * Busca todas as visitas de todos os pesqueiros (para o calendário/timeline).
  */
 async function getAllVisitas() {
     try {
@@ -81,5 +60,27 @@ async function getAllVisitas() {
     } catch (error) {
         console.error("Falha ao buscar todas as visitas:", error);
         return [];
+    }
+}
+
+
+// --- FUNÇÃO AUXILIAR DE ENVIO ---
+
+/**
+ * Envia uma requisição POST para o Apps Script.
+ */
+async function postData(action, data) {
+    try {
+        const response = await fetch(SCRIPT_URL, {
+            method: 'POST',
+            mode: 'cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action, data }),
+        });
+        if (!response.ok) throw new Error(`Erro na requisição POST: ${response.statusText}`);
+        return await response.json();
+    } catch (error) {
+        console.error(`Falha na ação '${action}':`, error);
+        return { status: 'error', message: error.message };
     }
 }

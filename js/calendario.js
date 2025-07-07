@@ -1,23 +1,34 @@
 document.addEventListener('DOMContentLoaded', async function() {
     const calendarEl = document.getElementById('calendar');
+    if (!calendarEl) {
+        console.error("Elemento do calendário #calendar não encontrado.");
+        return;
+    }
 
-    // Busca os dados das visitas
+    // Busca os dados das visitas usando a função central do api.js
     const visitas = await getAllVisitas();
     const eventos = formatarVisitasParaCalendario(visitas);
 
     const calendar = new FullCalendar.Calendar(calendarEl, {
+        locale: 'pt-br', // Adiciona o idioma português
         initialView: 'dayGridMonth',
         headerToolbar: {
             left: 'prev,next today',
             center: 'title',
-            right: 'dayGridMonth,timeGridWeek'
+            right: 'dayGridMonth,timeGridWeek,listYear' // Adiciona a visualização de lista
         },
         events: eventos,
         eventClick: function(info) {
-            // Aqui você pode adicionar a lógica para o que acontece ao clicar em um evento
-            // Por exemplo, abrir um modal com os detalhes da visita
-            alert('Pesqueiro: ' + info.event.title + '\n' +
-                  'Observações: ' + info.event.extendedProps.observacoes);
+            // Cria uma string de detalhes mais completa para o alerta
+            const detalhes = `Pesqueiro: ${info.event.title}\n` +
+                             `Data: ${info.event.start.toLocaleDateString('pt-BR')}\n\n` +
+                             `Peixes Capturados:\n${info.event.extendedProps.peixes || 'Não registrado.'}\n\n` +
+                             `Observações:\n${info.event.extendedProps.observacoes || 'Nenhuma.'}`;
+            alert(detalhes);
+        },
+        eventDidMount: function(info) {
+            // Adiciona um tooltip (dica de ferramenta) ao evento no calendário
+            info.el.title = `Clique para ver detalhes da visita ao ${info.event.title}`;
         }
     });
 
@@ -25,31 +36,20 @@ document.addEventListener('DOMContentLoaded', async function() {
 });
 
 /**
- * Busca todas as visitas de todos os pesqueiros.
- * Esta função precisa ser adicionada ao seu api.js
- */
-async function getAllVisitas() {
-    try {
-        const response = await fetch(`${SCRIPT_URL}?action=readAllVisitas`);
-        if (!response.ok) throw new Error(`Erro na requisição: ${response.statusText}`);
-        return await response.json();
-    } catch (error) {
-        console.error("Falha ao buscar todas as visitas:", error);
-        return [];
-    }
-}
-
-/**
  * Formata os dados das visitas para o formato que o FullCalendar entende.
  */
 function formatarVisitasParaCalendario(visitas) {
+    if (!visitas || !Array.isArray(visitas)) {
+        return [];
+    }
     return visitas.map(visita => {
         return {
-            title: visita.PesqueiroNome, // Assumindo que o nome do pesqueiro virá da API
+            title: visita.PesqueiroNome || 'Visita sem nome', // Usa o nome do pesqueiro que vem da API
             start: visita.DataVisita,
             allDay: true,
-            extendedProps: {
-                observacoes: visita.Observacoes
+            extendedProps: { // Guarda informações extras
+                observacoes: visita.Observacoes,
+                peixes: visita.PeixesCapturados
             }
         };
     });
