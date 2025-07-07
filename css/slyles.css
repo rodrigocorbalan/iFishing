@@ -38,22 +38,41 @@
 }
 
 
-/* --- NOVOS ESTILOS PARA MARCADORES SVG --- */
+/* --- NOVOS ESTILOS PARA MARCADORES (ALFINETE + ETIQUETA COM NOME) --- */
 
-/* Container que segura o SVG e o número */
-.svg-marker-container {
-    position: relative; /* Essencial para posicionar o número sobre o SVG */
+/* Container que segura o pino SVG e a etiqueta */
+.custom-pin-label-marker {
+    display: flex;
+    align-items: center;
+    position: relative;
+    width: auto; /* Largura se ajusta ao conteúdo */
     cursor: pointer;
 }
 
-/* Estilo para o número que fica sobre o pino */
-.marker-number {
-    position: absolute;
-    top: 13px; /* Ajuste fino da posição vertical do número */
-    left: 50%; /* Centraliza horizontalmente */
-    transform: translateX(-50%);
-    color: white;
+/* Estiliza a etiqueta com o nome do pesqueiro */
+.marker-label-box {
+    /* Posicionamento ao lado do pino */
+    position: relative;
+    left: -10px; /* Sobrepõe um pouco o pino para um visual mais integrado */
+
+    /* Estilo da caixa (moldura e fundo) */
+    background: white;
+    border: 2px solid; /* A cor será definida via JS */
+    border-radius: 6px;
+    padding: 3px 8px;
+    
+    /* Estilo do texto */
+    color: black;
     font-size: 12px;
     font-weight: bold;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.5); /* Sombra para melhorar a leitura */
+    white-space: nowrap; /* Impede que o nome quebre em várias linhas */
+    
+    /* Sombra para dar profundidade */
+    box-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+/* Estilo para o pino SVG em si. Usamos position absolute para que a etiqueta possa se sobrepor */
+.custom-pin-label-marker svg {
+    position: relative;
+    z-index: 10; /* Garante que o pino fique na frente da etiqueta */
 }

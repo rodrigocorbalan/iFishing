@@ -8,7 +8,7 @@ function initMap(mapId) {
     map = L.map(mapId).setView([-23.5505, -46.6333], 8);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
 
     // Solução definitiva para o problema de sobreposição do modal
@@ -26,7 +26,7 @@ function clearMarkers() {
 }
 
 /**
- * Adiciona marcadores SVG (pino numerado) ao mapa.
+ * Adiciona marcadores customizados (pino + etiqueta com nome) ao mapa.
  */
 function addMarkersToMap(pesqueiros, onMarkerClick) {
     clearMarkers(); // Limpa os marcadores antigos
@@ -40,28 +40,30 @@ function addMarkersToMap(pesqueiros, onMarkerClick) {
 
             const pinColor = colors[index % colors.length];
 
-            const svgPinIcon = L.divIcon({
+            // Cria um ícone customizado usando L.divIcon com o pino e a etiqueta
+            const customIcon = L.divIcon({
                 className: '', // Não precisa de classe wrapper
                 html: `
-                    <div class="svg-marker-container">
+                    <div class="custom-pin-label-marker">
                         <svg width="32" height="32" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
                             <path fill="${pinColor}" d="M172.268 501.67C26.97 291.031 0 269.413 0 192 0 85.961 85.961 0 192 0s192 85.961 192 192c0 77.413-26.97 99.031-172.268 309.67a24 24 0 01-35.464 0z"></path>
                             <circle cx="192" cy="192" r="64" fill="white"></circle>
                         </svg>
-                        <span class="marker-number">${index + 1}</span>
+                        <div class="marker-label-box" style="border-color: ${pinColor};">
+                            ${p.NomePesqueiro}
+                        </div>
                     </div>
                 `,
-                iconSize: [32, 32],
-                iconAnchor: [16, 32],
-                popupAnchor: [0, -32]
+                iconSize: null, // Tamanho será definido pelo conteúdo
+                iconAnchor: [16, 32], // Ancoragem na ponta inferior do pino
+                popupAnchor: [0, -32] // Posição de onde o popup deve abrir
             });
 
-            const marker = L.marker([lat, lng], { icon: svgPinIcon }).addTo(map);
-            
-            // --- CONTEÚDO DO POPUP ATUALIZADO ---
+            const marker = L.marker([lat, lng], { icon: customIcon }).addTo(map);
+
             const popupContent = `
                 <div style="text-align: center;">
-                    <b>${index + 1}. ${p.NomePesqueiro}</b><br>
+                    <b>${p.NomePesqueiro}</b><br>
                     <small>${p.CidadeUF}</small>
                     <hr style="margin: 5px 0;">
                     <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}" target="_blank" style="color: #4285F4;">Rota com Google Maps</a><br>
@@ -71,8 +73,6 @@ function addMarkersToMap(pesqueiros, onMarkerClick) {
             `;
             marker.bindPopup(popupContent);
 
-            // --- CORREÇÃO DO BUG DO BOTÃO "VER MAIS DETALHES" ---
-            // Adicionamos o evento de clique no momento em que o popup é aberto
             marker.on('popupopen', (e) => {
                 const popup = e.popup;
                 const link = popup.getElement().querySelector('.details-link');
@@ -82,7 +82,7 @@ function addMarkersToMap(pesqueiros, onMarkerClick) {
                         const id = ev.target.getAttribute('data-id');
                         if (id) {
                             map.closePopup();
-                            onMarkerClick(id); // Chama a função para abrir o modal
+                            onMarkerClick(id);
                         }
                     });
                 }
