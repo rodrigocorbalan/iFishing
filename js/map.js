@@ -70,7 +70,7 @@ function addMarkersToMap(pesqueiros, onMarkerClick) {
                         <p>${p.CidadeUF}</p>
                     </div>
                     <div class="popup-actions">
-                        <a href="https://www.google.com/maps?q=${lat},${lng}" target="_blank" class="action-button">
+                        <a href="http://googleusercontent.com/maps.google.com/?q=${lat},${lng}" target="_blank" class="action-button">
                             <img src="img/icon_gmaps.svg" alt="Google Maps">
                             <span>Google Maps</span>
                         </a>
@@ -96,7 +96,7 @@ function addMarkersToMap(pesqueiros, onMarkerClick) {
                         const id = ev.target.closest('.details-link').getAttribute('data-id');
                         if (id) {
                             map.closePopup();
-                            onMarkerClick(p.ID, p.NomePesqueiro);
+                            onMarkerClick(id, p.NomePesqueiro);
                         }
                     });
                 }
@@ -104,7 +104,7 @@ function addMarkersToMap(pesqueiros, onMarkerClick) {
 
             markers.push(marker);
         } else {
-            console.warn(`Aviso: O pesqueiro '${p.NomePesqueiro}' (ID: ${p.ID}) não tem coordenadas e não será exibido no mapa.`);
+            console.warn(`Aviso: O pesqueiro '${p.NomePesqueiro}' (ID: ${p.ID}) não tem coordenadas.`);
         }
     });
 }

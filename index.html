@@ -180,21 +180,17 @@
             </div>
 
             <div id="details-content" class="p-6 overflow-y-auto">
-                <div id="pesqueiro-details-container" class="pb-4 mb-4 border-b">
-                    </div>
-
+                <div id="pesqueiro-details-container" class="pb-4 mb-4 border-b"></div>
                 <div class="border-b border-gray-200">
                     <nav class="-mb-px flex space-x-8" aria-label="Tabs">
                         <a href="#" id="tab-historico" class="border-blue-500 text-blue-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Histórico de Visitas</a>
                         <a href="#" id="tab-registrar" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Registrar Nova Visita</a>
                     </nav>
                 </div>
-
                 <div id="content-historico" class="mt-6">
-                    <p id="historico-empty-state" class="text-gray-500">Nenhuma visita registrada para este pesqueiro ainda.</p>
+                    <p id="historico-empty-state" class="text-gray-500">Nenhuma visita registrada.</p>
                     <div id="visitas-list" class="space-y-4"></div>
                 </div>
-
                 <div id="content-registrar" class="hidden mt-6">
                     <form id="visita-form">
                         <input type="hidden" id="visita-pesqueiro-id" name="PesqueiroID">
@@ -204,12 +200,12 @@
                                 <input type="date" name="DataVisita" id="DataVisita" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
                             </div>
                             <div>
-                                <label for="PeixesCapturados" class="block text-sm font-medium text-gray-700">Peixes Capturados (espécie, quantidade, peso, etc.)</label>
-                                <textarea name="PeixesCapturados" id="PeixesCapturados" rows="3" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" placeholder="Ex: Tilápia, 5, 1.5kg; Pacu, 2, 3kg"></textarea>
+                                <label for="PeixesCapturados" class="block text-sm font-medium text-gray-700">Peixes Capturados</label>
+                                <textarea name="PeixesCapturados" id="PeixesCapturados" rows="3" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" placeholder="Ex: Tilápia, 5, 1.5kg..."></textarea>
                             </div>
                             <div>
-                                <label for="Observacoes" class="block text-sm font-medium text-gray-700">Observações (clima, iscas, etc.)</label>
-                                <textarea name="Observacoes" id="Observacoes" rows="4" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" placeholder="Ex: Dia ensolarado, usei massa como isca."></textarea>
+                                <label for="Observacoes" class="block text-sm font-medium text-gray-700">Observações</label>
+                                <textarea name="Observacoes" id="Observacoes" rows="4" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" placeholder="Ex: Dia ensolarado..."></textarea>
                             </div>
                         </div>
                         <div class="pt-5 text-right">
@@ -228,10 +224,10 @@
                 <h3 class="mb-5 text-lg font-normal text-gray-500">
                     Você tem certeza que deseja excluir o pesqueiro <br> <strong id="pesqueiro-to-delete-name" class="text-gray-800"></strong>?
                 </h3>
-                <button id="btn-confirm-delete" class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center mr-2">
+                <button id="btn-confirm-delete" class="text-white bg-red-600 hover:bg-red-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2">
                     Sim, tenho certeza
                 </button>
-                <button id="btn-cancel-delete" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10">
+                <button id="btn-cancel-delete" class="text-gray-500 bg-white hover:bg-gray-100 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900">
                     Não, cancelar
                 </button>
             </div>

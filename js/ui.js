@@ -3,19 +3,23 @@ let todosOsPesqueiros = [];
 let pesqueirosFiltrados = [];
 let pesqueiroIdToDelete = null;
 
-// Função principal que inicializa a UI.
 async function initUI() {
     showLoading(true);
-    todosOsPesqueiros = await getPesqueiros();
-    pesqueirosFiltrados = [...todosOsPesqueiros];
-    renderTable(pesqueirosFiltrados);
-    addMarkersToMap(pesqueirosFiltrados, showVisitasModal);
-    populateFishFilter(todosOsPesqueiros);
-    setupEventListeners();
-    showLoading(false);
+    try {
+        todosOsPesqueiros = await getPesqueiros();
+        pesqueirosFiltrados = [...todosOsPesqueiros];
+        renderTable(pesqueirosFiltrados);
+        addMarkersToMap(pesqueirosFiltrados, (id, nome) => showDetailsModal(id, nome));
+        populateFishFilter(todosOsPesqueiros);
+        setupEventListeners();
+    } catch (error) {
+        console.error("Falha fatal na inicialização da UI:", error);
+        alert("Ocorreu um erro grave ao carregar a aplicação. Verifique o console para mais detalhes.");
+    } finally {
+        showLoading(false);
+    }
 }
 
-// Renderiza a tabela de pesqueiros.
 function renderTable(pesqueiros) {
     const tableBody = document.getElementById('pesqueiros-table-body');
     tableBody.innerHTML = '';
@@ -46,7 +50,6 @@ function renderTable(pesqueiros) {
     });
 }
 
-// Popula o filtro de espécies de peixes.
 function populateFishFilter(pesqueiros) {
     const fishFilter = document.getElementById('fish-filter');
     const allFish = new Set();
@@ -69,7 +72,6 @@ function populateFishFilter(pesqueiros) {
     });
 }
 
-// Aplica os filtros e atualiza a UI.
 function applyFilters() {
     const nameFilterValue = document.getElementById('name-filter').value.toLowerCase();
     const timeFilterValue = document.getElementById('time-filter').value;
@@ -85,10 +87,9 @@ function applyFilters() {
         return nameMatch && timeMatch && fishMatch && priceMatch && reserveMatch;
     });
     renderTable(pesqueirosFiltrados);
-    addMarkersToMap(pesqueirosFiltrados, showVisitasModal);
+    addMarkersToMap(pesqueirosFiltrados, (id, nome) => showDetailsModal(id, nome));
 }
 
-// Configura todos os listeners de eventos da página.
 function setupEventListeners() {
     document.getElementById('name-filter').addEventListener('input', applyFilters);
     document.getElementById('price-filter').addEventListener('input', applyFilters);
@@ -114,16 +115,17 @@ function setupEventListeners() {
         const id = row.getAttribute('data-id');
         if (!id) return;
         
+        const pesqueiro = todosOsPesqueiros.find(p => p.ID == id);
+        if (!pesqueiro) return;
+
         if (target.classList.contains('btn-edit')) {
             e.stopPropagation();
             showFormModal(id);
         } else if (target.classList.contains('btn-delete')) {
             e.stopPropagation();
-            const nome = row.cells[1].textContent;
-            showConfirmDeleteModal(id, nome);
+            showConfirmDeleteModal(id, pesqueiro.NomePesqueiro);
         } else {
-             const pesqueiro = todosOsPesqueiros.find(p => p.ID == id);
-             if(pesqueiro) showVisitasModal(pesqueiro.ID, pesqueiro.NomePesqueiro);
+             showDetailsModal(id, pesqueiro.NomePesqueiro);
         }
     });
 
@@ -139,10 +141,6 @@ function setupEventListeners() {
         if (pesqueiroIdToDelete) handleDelete(pesqueiroIdToDelete);
     });
 
-    const visitasModal = document.getElementById('visitas-modal');
-    visitasModal.querySelectorAll('.visitas-modal-close-btn').forEach(btn => btn.addEventListener('click', hideVisitasModal));
-    visitasModal.querySelector('.modal-bg').addEventListener('click', hideVisitasModal);
-
     const tabHistorico = document.getElementById('tab-historico');
     const tabRegistrar = document.getElementById('tab-registrar');
     const contentHistorico = document.getElementById('content-historico');
@@ -151,8 +149,8 @@ function setupEventListeners() {
     tabHistorico.addEventListener('click', e => {
         e.preventDefault();
         tabHistorico.classList.add('border-blue-500', 'text-blue-600');
-        tabHistorico.classList.remove('border-transparent', 'text-gray-500');
-        tabRegistrar.classList.add('border-transparent', 'text-gray-500');
+        tabHistorico.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+        tabRegistrar.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
         tabRegistrar.classList.remove('border-blue-500', 'text-blue-600');
         contentHistorico.classList.remove('hidden');
         contentRegistrar.classList.add('hidden');
@@ -161,8 +159,8 @@ function setupEventListeners() {
     tabRegistrar.addEventListener('click', e => {
         e.preventDefault();
         tabRegistrar.classList.add('border-blue-500', 'text-blue-600');
-        tabRegistrar.classList.remove('border-transparent', 'text-gray-500');
-        tabHistorico.classList.add('border-transparent', 'text-gray-500');
+        tabRegistrar.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+        tabHistorico.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
         tabHistorico.classList.remove('border-blue-500', 'text-blue-600');
         contentRegistrar.classList.remove('hidden');
         contentHistorico.classList.add('hidden');
@@ -191,10 +189,7 @@ function setupEventListeners() {
 }
 
 function showLoading(isLoading) {
-    const loader = document.getElementById('loader');
-    if (loader) {
-        loader.style.display = isLoading ? 'flex' : 'none';
-    }
+    document.getElementById('loader').style.display = isLoading ? 'flex' : 'none';
 }
 
 function showFormModal(id = null) {
@@ -202,10 +197,10 @@ function showFormModal(id = null) {
     const modalTitle = modal.querySelector('#modal-title');
     const form = modal.querySelector('#pesqueiro-form');
     
-    form.reset();
-    modal.querySelector('#form-content').style.display = 'block';
     modal.querySelector('#details-content').style.display = 'none';
-
+    modal.querySelector('#form-content').style.display = 'block';
+    
+    form.reset();
     if (id) {
         modalTitle.textContent = 'Editar Pesqueiro';
         const pesqueiro = todosOsPesqueiros.find(p => p.ID == id);
@@ -223,9 +218,58 @@ function showFormModal(id = null) {
     modal.classList.remove('hidden');
 }
 
-function showDetailsModal(id, nome) {
+async function showDetailsModal(id, nome) {
+    const modal = document.getElementById('modal');
+    const modalTitle = modal.querySelector('#modal-title');
+    
+    modal.querySelector('#form-content').style.display = 'none';
+    modal.querySelector('#details-content').style.display = 'block';
+    
+    modalTitle.textContent = nome;
+
     const pesqueiro = todosOsPesqueiros.find(p => p.ID == id);
-    if(pesqueiro) showVisitasModal(id, pesqueiro.NomePesqueiro);
+    if (!pesqueiro) return;
+    
+    const detailsContainer = document.getElementById('pesqueiro-details-container');
+    const peixesHtml = pesqueiro.Peixes ? pesqueiro.Peixes.split(',').map(p => `<span class="bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded">${p.trim()}</span>`).join('') : 'Não informado';
+    detailsContainer.innerHTML = `
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-sm">
+            <div><strong>Endereço:</strong><br>${pesqueiro.EnderecoCompleto || 'N/A'}</div>
+            <div><strong>Telefone:</strong><br>${pesqueiro.Telefone || 'N/A'}</div>
+            <div><strong>Preço Médio:</strong><br>R$ ${pesqueiro.PrecoMedio || 'N/A'}</div>
+            <div><strong>Site:</strong><br><a href="${pesqueiro.Site}" target="_blank" class="text-blue-500 hover:underline">${pesqueiro.Site || 'Nenhum'}</a></div>
+            <div class="sm:col-span-2"><strong>Peixes:</strong><br>${peixesHtml}</div>
+        </div>
+    `;
+    
+    document.getElementById('visita-pesqueiro-id').value = id;
+    
+    const visitasList = document.getElementById('visitas-list');
+    const emptyState = document.getElementById('historico-empty-state');
+    visitasList.innerHTML = '<p class="text-center p-4">Carregando histórico...</p>';
+    emptyState.classList.add('hidden');
+    document.getElementById('tab-historico').click();
+    modal.classList.remove('hidden');
+    
+    const visitas = await getVisitas(id);
+    visitasList.innerHTML = '';
+    if (visitas.length === 0) {
+        emptyState.classList.remove('hidden');
+    } else {
+        emptyState.classList.add('hidden');
+        visitas.sort((a, b) => new Date(b.DataVisita) - new Date(a.DataVisita));
+        visitas.forEach(visita => {
+            const dataFormatada = new Date(visita.DataVisita).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+            const visitaEl = document.createElement('div');
+            visitaEl.className = 'p-4 border rounded-md shadow-sm bg-gray-50';
+            visitaEl.innerHTML = `
+                <p class="font-bold text-gray-800">${dataFormatada}</p>
+                <div class="mt-2"><p class="font-semibold text-gray-700">Peixes Capturados:</p><p class="text-gray-600 whitespace-pre-wrap">${visita.PeixesCapturados || 'N/A'}</p></div>
+                <div class="mt-2"><p class="font-semibold text-gray-700">Observações:</p><p class="text-gray-600 whitespace-pre-wrap">${visita.Observacoes || 'N/A'}</p></div>
+            `;
+            visitasList.appendChild(visitaEl);
+        });
+    }
 }
 
 function hideModal() {
@@ -292,53 +336,6 @@ async function geocodeAddress(address) {
     }
 }
 
-async function showVisitasModal(id, nome) {
-    const modal = document.getElementById('visitas-modal');
-    const title = document.getElementById('visitas-modal-title');
-    const visitasList = document.getElementById('visitas-list');
-    const emptyState = document.getElementById('historico-empty-state');
-    
-    title.textContent = `Histórico de: ${nome}`;
-    document.getElementById('visita-pesqueiro-id').value = id;
-    
-    document.getElementById('tab-historico').click();
-
-    visitasList.innerHTML = '<p class="text-center p-4">Carregando histórico...</p>';
-    emptyState.classList.add('hidden');
-    modal.classList.remove('hidden');
-    
-    const visitas = await getVisitas(id);
-    visitasList.innerHTML = '';
-
-    if (visitas.length === 0) {
-        emptyState.classList.remove('hidden');
-    } else {
-        emptyState.classList.add('hidden');
-        visitas.sort((a, b) => new Date(b.DataVisita) - new Date(a.DataVisita));
-        visitas.forEach(visita => {
-            const dataFormatada = new Date(visita.DataVisita).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
-            const visitaEl = document.createElement('div');
-            visitaEl.className = 'p-4 border rounded-md shadow-sm bg-gray-50';
-            visitaEl.innerHTML = `
-                <p class="font-bold text-lg text-gray-800">${dataFormatada}</p>
-                <div class="mt-2">
-                    <p class="font-semibold text-gray-700">Peixes Capturados:</p>
-                    <p class="text-gray-600 whitespace-pre-wrap">${visita.PeixesCapturados || 'Nenhum registrado.'}</p>
-                </div>
-                <div class="mt-2">
-                    <p class="font-semibold text-gray-700">Observações:</p>
-                    <p class="text-gray-600 whitespace-pre-wrap">${visita.Observacoes || 'Nenhuma.'}</p>
-                </div>
-            `;
-            visitasList.appendChild(visitaEl);
-        });
-    }
-}
-
-function hideVisitasModal() {
-    document.getElementById('visitas-modal').classList.add('hidden');
-}
-
 async function handleVisitaFormSubmit(e) {
     e.preventDefault();
     showLoading(true);
@@ -350,7 +347,7 @@ async function handleVisitaFormSubmit(e) {
     if (response.status === 'success') {
         const pesqueiro = todosOsPesqueiros.find(p => p.ID == visitaData.PesqueiroID);
         form.reset();
-        await showVisitasModal(visitaData.PesqueiroID, pesqueiro.NomePesqueiro);
+        await showDetailsModal(visitaData.PesqueiroID, pesqueiro.NomePesqueiro);
     }
     showLoading(false);
 }
