@@ -27,39 +27,50 @@ function addMarkersToMap(pesqueiros, onMarkerClick) {
         if (p.Latitude && p.Longitude) {
             const lat = parseFloat(p.Latitude);
             const lng = parseFloat(p.Longitude);
-
             const pinColor = colors[index % colors.length];
 
-            const customIcon = L.divIcon({
-                className: '',
+            // --- VOLTAMOS PARA O ÍCONE DE PINO NUMERADO ---
+            const svgPinIcon = L.divIcon({
+                className: 'custom-marker-wrapper', // Classe wrapper sem estilo
                 html: `
-                    <div class="custom-pin-label-marker">
-                        <svg width="40" height="40" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                    <div class="svg-marker-container">
+                        <svg width="38" height="38" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.7));">
                             <path fill="${pinColor}" d="M172.268 501.67C26.97 291.031 0 269.413 0 192 0 85.961 85.961 0 192 0s192 85.961 192 192c0 77.413-26.97 99.031-172.268 309.67a24 24 0 01-35.464 0z"></path>
+                            <circle cx="192" cy="192" r="64" fill="white"></circle>
                         </svg>
-                        <div class="marker-label-box" style="border-color: ${pinColor};">
-                            ${p.NomePesqueiro}
-                        </div>
+                        <span class="marker-number">${index + 1}</span>
                     </div>
                 `,
-                iconSize: [200, 42], // Tamanho fixo para dar estabilidade
-                iconAnchor: [20, 42], // Ancoragem na ponta inferior do pino
-                popupAnchor: [0, -40]
+                iconSize: [38, 38],
+                iconAnchor: [19, 38],
+                popupAnchor: [0, -35]
             });
 
-            const marker = L.marker([lat, lng], { icon: customIcon }).addTo(map);
-
+            const marker = L.marker([lat, lng], { icon: svgPinIcon }).addTo(map);
+            
+            // --- NOVO CONTEÚDO CUSTOMIZADO PARA O POPUP ---
             const popupContent = `
-                <div style="text-align: center;">
-                    <b>${p.NomePesqueiro}</b><br>
-                    <small>${p.CidadeUF}</small>
-                    <hr style="margin: 5px 0;">
-                    <a href="http://googleusercontent.com/maps.google.com/3{lat},${lng}" target="_blank" style="color: #4285F4;">Rota com Google Maps</a><br>
-                    <a href="https://waze.com/ul?ll=${lat},${lng}&navigate=yes" target="_blank" style="color: #33ccff;">Rota com Waze</a><br>
-                    <a href="#" class="details-link" data-id="${p.ID}" style="color: #0056b3; font-weight: bold;">Ver mais detalhes</a>
+                <div class="popup-title" style="border-color: ${pinColor};">
+                    ${p.NomePesqueiro}
+                </div>
+                <div class="popup-buttons-container">
+                    <a href="http://googleusercontent.com/maps.google.com/4{lat},${lng}" target="_blank" class="popup-button">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/a/aa/Maps_icon_(2020).svg" alt="Google Maps">
+                        <span>Google Maps</span>
+                    </a>
+                    <a href="https://waze.com/ul?ll=${lat},${lng}&navigate=yes" target="_blank" class="popup-button">
+                        <img src="https://cdn-icons-png.flaticon.com/512/5968/5968848.png" alt="Waze">
+                        <span>Waze</span>
+                    </a>
+                    <a href="#" class="details-link popup-button" data-id="${p.ID}">
+                        <img src="https://cdn-icons-png.flaticon.com/512/157/157933.png" alt="Mais Detalhes">
+                        <span>Detalhes</span>
+                    </a>
                 </div>
             `;
-            marker.bindPopup(popupContent);
+            
+            // Adiciona a classe 'custom-popup' ao popup
+            marker.bindPopup(popupContent, { className: 'custom-popup' });
 
             marker.on('popupopen', (e) => {
                 const popup = e.popup;
@@ -67,7 +78,7 @@ function addMarkersToMap(pesqueiros, onMarkerClick) {
                 if (link) {
                     link.addEventListener('click', (ev) => {
                         ev.preventDefault();
-                        const id = ev.target.getAttribute('data-id');
+                        const id = ev.target.closest('.details-link').getAttribute('data-id');
                         if (id) {
                             map.closePopup();
                             onMarkerClick(id);
