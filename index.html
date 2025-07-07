@@ -107,13 +107,13 @@
     
     <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center p-4 z-50">
         <div class="modal-bg fixed inset-0"></div>
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl z-10 max-h-full overflow-y-auto">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl z-10 max-h-[90vh] flex flex-col">
             <div class="p-4 border-b flex justify-between items-center">
                 <h2 id="modal-title" class="text-2xl font-semibold"></h2>
                 <button class="modal-close-btn text-gray-500 hover:text-gray-800 text-3xl">×</button>
             </div>
-            <div id="details-content" class="p-6"></div>
-            <div id="form-content" class="p-6">
+            
+            <div id="form-content" class="p-6 overflow-y-auto hidden">
                 <form id="pesqueiro-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <input type="hidden" id="ID" name="ID">
                     <div>
@@ -178,44 +178,23 @@
                     </div>
                 </form>
             </div>
-        </div>
-    </div>
 
-    <div id="confirm-delete-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center p-4 z-50">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
-            <div class="p-6 text-center">
-                <svg class="mx-auto mb-4 w-14 h-14 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                <h3 class="mb-5 text-lg font-normal text-gray-500">
-                    Você tem certeza que deseja excluir o pesqueiro <br> <strong id="pesqueiro-to-delete-name" class="text-gray-800"></strong>?
-                </h3>
-                <button id="btn-confirm-delete" class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center mr-2">
-                    Sim, tenho certeza
-                </button>
-                <button id="btn-cancel-delete" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10">
-                    Não, cancelar
-                </button>
-            </div>
-        </div>
-    </div>
+            <div id="details-content" class="p-6 overflow-y-auto">
+                <div id="pesqueiro-details-container" class="pb-4 mb-4 border-b">
+                    </div>
 
-    <div id="visitas-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center p-4 z-50">
-        <div class="modal-bg fixed inset-0"></div>
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl z-10 max-h-[90vh] flex flex-col">
-            <div class="p-4 border-b flex justify-between items-center">
-                <h2 id="visitas-modal-title" class="text-2xl font-semibold">Histórico de Visitas</h2>
-                <button class="visitas-modal-close-btn text-gray-500 hover:text-gray-800 text-3xl">×</button>
-            </div>
-            <div class="p-6 overflow-y-auto">
                 <div class="border-b border-gray-200">
                     <nav class="-mb-px flex space-x-8" aria-label="Tabs">
-                        <a href="#" id="tab-historico" class="border-blue-500 text-blue-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Histórico</a>
+                        <a href="#" id="tab-historico" class="border-blue-500 text-blue-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Histórico de Visitas</a>
                         <a href="#" id="tab-registrar" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Registrar Nova Visita</a>
                     </nav>
                 </div>
+
                 <div id="content-historico" class="mt-6">
                     <p id="historico-empty-state" class="text-gray-500">Nenhuma visita registrada para este pesqueiro ainda.</p>
                     <div id="visitas-list" class="space-y-4"></div>
                 </div>
+
                 <div id="content-registrar" class="hidden mt-6">
                     <form id="visita-form">
                         <input type="hidden" id="visita-pesqueiro-id" name="PesqueiroID">
@@ -238,6 +217,23 @@
                         </div>
                     </form>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirm-delete-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center p-4 z-50">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div class="p-6 text-center">
+                <svg class="mx-auto mb-4 w-14 h-14 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <h3 class="mb-5 text-lg font-normal text-gray-500">
+                    Você tem certeza que deseja excluir o pesqueiro <br> <strong id="pesqueiro-to-delete-name" class="text-gray-800"></strong>?
+                </h3>
+                <button id="btn-confirm-delete" class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center mr-2">
+                    Sim, tenho certeza
+                </button>
+                <button id="btn-cancel-delete" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10">
+                    Não, cancelar
+                </button>
             </div>
         </div>
     </div>

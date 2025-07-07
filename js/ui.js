@@ -224,7 +224,8 @@ function showFormModal(id = null) {
 }
 
 function showDetailsModal(id, nome) {
-    showVisitasModal(id, nome);
+    const pesqueiro = todosOsPesqueiros.find(p => p.ID == id);
+    if(pesqueiro) showVisitasModal(id, pesqueiro.NomePesqueiro);
 }
 
 function hideModal() {
