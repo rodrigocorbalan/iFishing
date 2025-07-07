@@ -1,26 +1,17 @@
 let map = null;
 const markers = []; // Array para guardar os marcadores e poder limpá-los
 
-/**
- * Inicializa o mapa, adiciona o controle de tela cheia e o marcador de casa.
- */
 function initMap(mapId) {
-    // Coordenadas para Rua Sud Menucci, 170, Santo André, SP
     const homeCoords = [-23.6763, -46.5414]; 
-
-    // Inicializa o mapa com o controle de tela cheia
     map = L.map(mapId, {
         fullscreenControl: true,
         fullscreenControlOptions: {
             position: 'topright'
         }
-    }).setView(homeCoords, 13); // Inicia com zoom no ponto de partida
-
+    }).setView(homeCoords, 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
-
-    // Cria e adiciona o ícone de casa
     const homeIcon = L.icon({
         iconUrl: 'https://cdn-icons-png.flaticon.com/512/1946/1946436.png',
         iconSize: [40, 40],
@@ -28,17 +19,11 @@ function initMap(mapId) {
         popupAnchor: [0, -40],
         className: 'home-icon'
     });
-
     L.marker(homeCoords, { icon: homeIcon }).addTo(map)
         .bindPopup('<b>Seu Ponto de Partida</b><br>Rua Sud Menucci, 170');
-
-    // Garante que o mapa fique na camada de trás
     document.getElementById(mapId).style.zIndex = 0;
 }
 
-/**
- * Limpa todos os marcadores de pesqueiros do mapa.
- */
 function clearMarkers() {
     markers.forEach(marker => {
         map.removeLayer(marker);
@@ -46,20 +31,14 @@ function clearMarkers() {
     markers.length = 0;
 }
 
-/**
- * Adiciona marcadores SVG numerados ao mapa, com tooltip e popup.
- */
 function addMarkersToMap(pesqueiros, onMarkerClick) {
     clearMarkers();
-
     const colors = ['#e6194B', '#3cb44b', '#4363d8', '#f58231', '#911eb4', '#46f0f0', '#f032e6', '#bcf60c', '#fabebe', '#008080', '#e6beff', '#9A6324'];
-
     pesqueiros.forEach((p, index) => {
         if (p.Latitude && p.Longitude) {
             const lat = parseFloat(p.Latitude);
             const lng = parseFloat(p.Longitude);
             const pinColor = colors[index % colors.length];
-
             const svgPinIcon = L.divIcon({
                 className: 'custom-marker-wrapper',
                 html: `
@@ -75,10 +54,8 @@ function addMarkersToMap(pesqueiros, onMarkerClick) {
                 iconAnchor: [19, 38],
                 popupAnchor: [0, -38]
             });
-
             const marker = L.marker([lat, lng], { icon: svgPinIcon }).addTo(map);
-
-            // Adiciona o Tooltip que aparece ao passar o mouse
+            
             marker.bindTooltip(p.NomePesqueiro, {
                 permanent: false,
                 direction: 'top',
@@ -86,7 +63,6 @@ function addMarkersToMap(pesqueiros, onMarkerClick) {
                 className: 'custom-tooltip'
             });
             
-            // Adiciona o Popup que aparece ao clicar
             const popupContent = `
                 <div class="popup-main-content">
                     <div class="popup-header">
@@ -94,7 +70,7 @@ function addMarkersToMap(pesqueiros, onMarkerClick) {
                         <p>${p.CidadeUF}</p>
                     </div>
                     <div class="popup-actions">
-                        <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}" target="_blank" class="action-button">
+                        <a href="https://www.google.com/maps?q=${lat},${lng}" target="_blank" class="action-button">
                             <img src="img/icon_gmaps.svg" alt="Google Maps">
                             <span>Google Maps</span>
                         </a>
@@ -111,7 +87,6 @@ function addMarkersToMap(pesqueiros, onMarkerClick) {
             `;
             marker.bindPopup(popupContent, { className: 'custom-popup' });
 
-            // Adiciona o evento de clique para o link "Ver mais detalhes"
             marker.on('popupopen', (e) => {
                 const popup = e.popup;
                 const link = popup.getElement().querySelector('.details-link');
@@ -121,7 +96,7 @@ function addMarkersToMap(pesqueiros, onMarkerClick) {
                         const id = ev.target.closest('.details-link').getAttribute('data-id');
                         if (id) {
                             map.closePopup();
-                            onMarkerClick(id);
+                            onMarkerClick(p.ID, p.NomePesqueiro);
                         }
                     });
                 }
