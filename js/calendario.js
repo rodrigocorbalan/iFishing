@@ -1,25 +1,41 @@
 document.addEventListener('DOMContentLoaded', async function() {
     const calendarEl = document.getElementById('calendar');
+    const loaderEl = document.getElementById('calendar-loader');
+    
     if (!calendarEl) {
         console.error("Elemento do calendário #calendar não encontrado.");
+        loaderEl.textContent = "Erro: Div do calendário não encontrada.";
         return;
     }
 
-    // Busca os dados das visitas usando a função central do api.js
-    const visitas = await getAllVisitas();
-    const eventos = formatarVisitasParaCalendario(visitas);
+    let eventos = [];
+    try {
+        // Busca os dados das visitas usando a função central do api.js
+        const visitas = await getAllVisitas();
+        if(visitas.error){
+            throw new Error(visitas.error);
+        }
+        eventos = formatarVisitasParaCalendario(visitas);
+    } catch (error) {
+        console.error("Não foi possível carregar os eventos do calendário:", error);
+        loaderEl.textContent = `Erro ao carregar eventos: ${error.message}. Verifique a planilha e o script.`;
+        return; // Interrompe a execução se não conseguir buscar os dados
+    }
+    
+    // Esconde o loader e mostra o calendário
+    loaderEl.style.display = 'none';
+    calendarEl.style.visibility = 'visible';
 
     const calendar = new FullCalendar.Calendar(calendarEl, {
-        locale: 'pt-br', // Adiciona o idioma português
+        locale: 'pt-br',
         initialView: 'dayGridMonth',
         headerToolbar: {
             left: 'prev,next today',
             center: 'title',
-            right: 'dayGridMonth,timeGridWeek,listYear' // Adiciona a visualização de lista
+            right: 'dayGridMonth,timeGridWeek,listYear'
         },
         events: eventos,
         eventClick: function(info) {
-            // Cria uma string de detalhes mais completa para o alerta
             const detalhes = `Pesqueiro: ${info.event.title}\n` +
                              `Data: ${info.event.start.toLocaleDateString('pt-BR')}\n\n` +
                              `Peixes Capturados:\n${info.event.extendedProps.peixes || 'Não registrado.'}\n\n` +
@@ -27,7 +43,6 @@ document.addEventListener('DOMContentLoaded', async function() {
             alert(detalhes);
         },
         eventDidMount: function(info) {
-            // Adiciona um tooltip (dica de ferramenta) ao evento no calendário
             info.el.title = `Clique para ver detalhes da visita ao ${info.event.title}`;
         }
     });
@@ -44,10 +59,10 @@ function formatarVisitasParaCalendario(visitas) {
     }
     return visitas.map(visita => {
         return {
-            title: visita.PesqueiroNome || 'Visita sem nome', // Usa o nome do pesqueiro que vem da API
+            title: visita.PesqueiroNome || 'Visita sem nome',
             start: visita.DataVisita,
             allDay: true,
-            extendedProps: { // Guarda informações extras
+            extendedProps: {
                 observacoes: visita.Observacoes,
                 peixes: visita.PeixesCapturados
             }
