@@ -29,7 +29,6 @@ function addMarkersToMap(pesqueiros, onMarkerClick) {
             const lng = parseFloat(p.Longitude);
             const pinColor = colors[index % colors.length];
 
-            // Marcador continua sendo o pino SVG numerado
             const svgPinIcon = L.divIcon({
                 className: 'custom-marker-wrapper',
                 html: `
@@ -48,7 +47,7 @@ function addMarkersToMap(pesqueiros, onMarkerClick) {
 
             const marker = L.marker([lat, lng], { icon: svgPinIcon }).addTo(map);
             
-            // --- NOVO HTML PARA O CONTEÚDO DO POPUP, BASEADO NA SUA SIMULAÇÃO ---
+            // --- CONTEÚDO DO POPUP COM OS ÍCONES LOCAIS ---
             const popupContent = `
                 <div class="popup-main-content">
                     <div class="popup-header">
@@ -56,23 +55,22 @@ function addMarkersToMap(pesqueiros, onMarkerClick) {
                         <p>${p.CidadeUF}</p>
                     </div>
                     <div class="popup-actions">
-                        <a href="http://googleusercontent.com/maps.google.com/5{lat},${lng}" target="_blank" class="action-button">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/a/aa/Maps_icon_(2020).svg" alt="Google Maps">
+                        <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}" target="_blank" class="action-button">
+                            <img src="img/icon_gmaps.svg" alt="Google Maps">
                             <span>Google Maps</span>
                         </a>
                         <a href="https://waze.com/ul?ll=${lat},${lng}&navigate=yes" target="_blank" class="action-button">
-                            <img src="https://www.waze.com/web/social-share-icon.png" alt="Waze">
+                            <img src="img/icon_waze.svg" alt="Waze">
                             <span>Waze</span>
                         </a>
                         <a href="#" class="details-link action-button" data-id="${p.ID}">
-                            <img src="https://www.svgrepo.com/show/506597/info-circle.svg" alt="Detalhes">
+                            <img src="img/icon_details.svg" alt="Detalhes">
                             <span>Detalhes</span>
                         </a>
                     </div>
                 </div>
             `;
             
-            // Adiciona a classe 'custom-popup' para aplicar o novo estilo
             marker.bindPopup(popupContent, { className: 'custom-popup' });
 
             marker.on('popupopen', (e) => {
