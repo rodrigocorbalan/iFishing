@@ -104,6 +104,7 @@ function applyFilters() {
  * Configura todos os listeners de eventos da página.
  */
 function setupEventListeners() {
+    // Filtros
     document.getElementById('name-filter').addEventListener('input', applyFilters);
     document.getElementById('price-filter').addEventListener('input', applyFilters);
     document.getElementById('reserve-filter').addEventListener('change', applyFilters);
@@ -119,8 +120,10 @@ function setupEventListeners() {
         applyFilters();
     });
 
+    // Botão para adicionar novo pesqueiro
     document.getElementById('add-pesqueiro-btn').addEventListener('click', () => showFormModal());
 
+    // Event Delegation para cliques na tabela
     const tableBody = document.getElementById('pesqueiros-table-body');
     tableBody.addEventListener('click', (e) => {
         const target = e.target;
@@ -140,9 +143,37 @@ function setupEventListeners() {
         }
     });
 
+    // Fechar modal
     document.querySelector('.modal-close-btn').addEventListener('click', hideModal);
     document.querySelector('.modal-bg').addEventListener('click', hideModal);
+
+    // Submit do formulário
     document.getElementById('pesqueiro-form').addEventListener('submit', handleFormSubmit);
+
+    // --- NOVA FUNCIONALIDADE: BUSCA DE COORDENADAS PELO ENDEREÇO ---
+    const addressInput = document.getElementById('EnderecoCompleto');
+    addressInput.addEventListener('blur', async (e) => { // 'blur' é acionado quando o usuário clica fora do campo
+        const address = e.target.value;
+        if (address.length < 10) return; // Só busca se o endereço for minimamente longo
+
+        const latInput = document.getElementById('Latitude');
+        const lonInput = document.getElementById('Longitude');
+        
+        // Feedback visual para o usuário
+        latInput.value = 'Buscando...';
+        lonInput.value = 'Buscando...';
+
+        const coords = await geocodeAddress(address);
+
+        if (coords) {
+            latInput.value = coords.lat;
+            lonInput.value = coords.lon;
+        } else {
+            latInput.value = '';
+            lonInput.value = '';
+            alert('Endereço não encontrado. Por favor, verifique ou insira as coordenadas manualmente.');
+        }
+    });
 }
 
 /**
@@ -202,7 +233,6 @@ function showDetailsModal(id) {
 
     const peixesHtml = pesqueiro.Peixes ? pesqueiro.Peixes.split(',').map(p => `<span class="bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded">${p.trim()}</span>`).join('') : 'Não informado';
 
-    // --- CONTEÚDO HTML ATUALIZADO COM OS NOVOS BOTÕES ---
     detailsContent.innerHTML = `
         <p class="mb-2"><strong>Endereço:</strong> ${pesqueiro.EnderecoCompleto || 'Não informado'}</p>
         <p class="mb-2"><strong>Cidade/UF:</strong> ${pesqueiro.CidadeUF}</p>
@@ -214,7 +244,7 @@ function showDetailsModal(id) {
         <p class="mb-2"><strong>Instagram:</strong> <a href="${pesqueiro.Instagram}" target="_blank" class="text-blue-500 hover:underline">${pesqueiro.Instagram || 'Nenhum'}</a></p>
         
         <div class="mt-6 pt-4 border-t flex items-center gap-4">
-            <a href="https://www.google.com/maps/dir/?api=1&destination=$${pesqueiro.Latitude},${pesqueiro.Longitude}" target="_blank" class="flex-1 text-center bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+            <a href="https://www.google.com/maps/dir/?api=1&destination={pesqueiro.Latitude},${pesqueiro.Longitude}" target="_blank" class="flex-1 text-center bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
                 Rota com Google Maps
             </a>
             <a href="https://waze.com/ul?ll=${pesqueiro.Latitude},${pesqueiro.Longitude}&navigate=yes" target="_blank" class="flex-1 text-center bg-cyan-500 text-white px-4 py-2 rounded hover:bg-cyan-600">
@@ -226,21 +256,19 @@ function showDetailsModal(id) {
         </div>
     `;
 
-    // --- LÓGICA PARA FAZER O NOVO BOTÃO 'EDITAR' FUNCIONAR ---
     const editBtnInModal = detailsContent.querySelector('#edit-in-modal-btn');
     if (editBtnInModal) {
         editBtnInModal.addEventListener('click', (e) => {
             const pesqueiroId = e.target.getAttribute('data-id');
-            hideModal(); // Fecha o modal de detalhes
-            setTimeout(() => { // Adiciona um pequeno delay para evitar conflitos de UI
-                showFormModal(pesqueiroId); // Abre o modal de edição
+            hideModal();
+            setTimeout(() => {
+                showFormModal(pesqueiroId);
             }, 100);
         });
     }
 
     modal.classList.remove('hidden');
 }
-
 
 /**
  * Esconde o modal principal.
@@ -292,6 +320,34 @@ async function handleDelete(id) {
         showLoading(false);
     }
 }
+
+/**
+ * --- NOVA FUNÇÃO ---
+ * Busca as coordenadas (latitude e longitude) de um endereço usando a API Nominatim.
+ * @param {string} address - O endereço a ser buscado.
+ * @returns {Promise<{lat: string, lon: string}|null>} As coordenadas ou null se não encontrar.
+ */
+async function geocodeAddress(address) {
+    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=1`;
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error('Falha na resposta da rede');
+        }
+        const data = await response.json();
+        if (data && data.length > 0) {
+            return {
+                lat: data[0].lat,
+                lon: data[0].lon
+            };
+        }
+        return null;
+    } catch (error) {
+        console.error("Erro ao buscar coordenadas:", error);
+        return null;
+    }
+}
+
 
 // Inicia a aplicação quando o DOM estiver pronto
 document.addEventListener('DOMContentLoaded', initUI);
