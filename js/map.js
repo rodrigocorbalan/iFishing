@@ -5,7 +5,6 @@ const markers = []; // Array para guardar os marcadores e poder limpá-los
  * Inicializa o mapa Leaflet na div especificada.
  */
 function initMap(mapId) {
-    // Coordenadas de exemplo para centralizar o mapa (São Paulo)
     map = L.map(mapId).setView([-23.5505, -46.6333], 8);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -27,12 +26,11 @@ function clearMarkers() {
 }
 
 /**
- * Adiciona marcadores customizados (pino + nome) ao mapa para cada pesqueiro na lista.
+ * Adiciona marcadores de pino numerado e colorido ao mapa.
  */
 function addMarkersToMap(pesqueiros, onMarkerClick) {
     clearMarkers(); // Limpa os marcadores antigos
 
-    // Define uma paleta de cores para variar os pinos
     const colors = ['#e6194B', '#3cb44b', '#4363d8', '#f58231', '#911eb4', '#46f0f0', '#f032e6', '#bcf60c', '#fabebe', '#008080', '#e6beff', '#9A6324'];
 
     pesqueiros.forEach((p, index) => {
@@ -40,38 +38,44 @@ function addMarkersToMap(pesqueiros, onMarkerClick) {
             const lat = parseFloat(p.Latitude);
             const lng = parseFloat(p.Longitude);
 
-            // Seleciona uma cor da paleta de forma rotativa
             const pinColor = colors[index % colors.length];
 
-            // Cria um ícone customizado usando L.divIcon com nosso novo HTML e CSS
-            const customIcon = L.divIcon({
-                className: 'custom-marker-wrapper', // Classe wrapper que não precisa de estilo
-                html: `
-                    <div class="custom-marker-container">
-                        <div class="marker-pin" style="background-color: ${pinColor};"></div>
-                        <div class="marker-label">${p.NomePesqueiro}</div>
-                    </div>
-                `,
-                iconSize: [180, 40],  // Largura aumentada para acomodar a etiqueta
-                iconAnchor: [15, 35],   // Posição da "ponta" do pino
-                popupAnchor: [0, -30]   // Posição de onde o popup deve abrir
+            // Cria um ícone customizado usando L.divIcon com o novo estilo
+            const numberedPinIcon = L.divIcon({
+                className: '', // Não precisa de classe wrapper, o estilo está no HTML interno
+                html: `<div class="numbered-pin-marker" style="background-color: ${pinColor};"><span>${index + 1}</span></div>`,
+                iconSize: [32, 32],
+                iconAnchor: [16, 32], // Ancoragem na ponta inferior do pino
+                popupAnchor: [0, -32] // Popup abre um pouco acima do pino
             });
 
-            // Cria o marcador usando o novo ícone
-            const marker = L.marker([lat, lng], { icon: customIcon }).addTo(map);
+            const marker = L.marker([lat, lng], { icon: numberedPinIcon }).addTo(map);
 
-            // O popup continua útil para mostrar mais detalhes rapidamente
             const popupContent = `
-                <b>${p.NomePesqueiro}</b><br>
+                <b>${index + 1}. ${p.NomePesqueiro}</b><br>
                 ${p.CidadeUF}<br>
-                Preço: R$ ${p.PrecoMedio}<br>
-                <a href="https://waze.com/ul?ll=${lat},${lng}&navigate=yes" target="_blank">Rota com Waze</a>
+                <a href="https://waze.com/ul?ll=${lat},${lng}&navigate=yes" target="_blank">Rota com Waze</a><br>
+                <a href="#" class="details-link" data-id="${p.ID}">Ver mais detalhes</a>
             `;
             marker.bindPopup(popupContent);
 
             markers.push(marker);
         } else {
-            console.warn(`Aviso: O pesqueiro '${p.NomePesqueiro}' (ID: ${p.ID}) não tem coordenadas e não será exibido no mapa.`);
+            console.warn(`Aviso: O pesqueiro '${p.NomePesqueiro}' não tem coordenadas e não será exibido no mapa.`);
         }
     });
+
+    // Adiciona um listener para os links de "Ver mais detalhes" dentro dos popups
+    // Usamos um timeout para garantir que o popup foi adicionado ao DOM
+    setTimeout(() => {
+        document.querySelectorAll('.details-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const id = e.target.getAttribute('data-id');
+                if (id) {
+                    showDetailsModal(id);
+                }
+            });
+        });
+    }, 100);
 }

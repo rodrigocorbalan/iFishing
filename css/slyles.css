@@ -37,49 +37,28 @@
     z-index: 0;
 }
 
-
-/* --- ESTILOS PARA MARCADORES CUSTOMIZADOS (ALFINETE + ETIQUETA) --- */
-
-/* Container principal para o marcador customizado (alfinete + etiqueta) */
-.custom-marker-container {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-}
-
-/* Estiliza o pino do mapa */
-.marker-pin {
-    width: 30px;
-    height: 30px;
-    border-radius: 50% 50% 50% 0; /* Cria a forma de pino invertido */
-    background: #c32b2b; /* Cor padrão, será alterada via JS */
-    position: relative;
+/* --- NOVO ESTILO PARA O ALFINETE NUMERADO --- */
+.numbered-pin-marker {
+    width: 32px;
+    height: 32px;
+    border-radius: 50% 50% 50% 0;
+    background: #c32b2b; /* Cor padrão */
+    position: absolute;
     transform: rotate(-45deg);
     border: 2px solid white;
     box-shadow: 0 0 5px rgba(0,0,0,0.5);
+    cursor: pointer;
+    
+    /* Centraliza o número dentro do pino */
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-/* Cria o círculo branco no centro do pino */
-.marker-pin::after {
-    content: '';
-    width: 14px;
-    height: 14px;
-    margin: 8px 0 0 8px;
-    background: #ffffff;
-    position: absolute;
-    border-radius: 50%;
-}
-
-/* Estiliza a etiqueta com o nome do pesqueiro */
-.marker-label {
-    position: absolute;
-    left: 40px; /* Posiciona a etiqueta à direita do pino */
-    background: rgba(255, 255, 255, 0.9);
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    padding: 5px 10px;
-    font-size: 12px;
+/* O número dentro do pino */
+.numbered-pin-marker span {
+    color: white;
+    font-size: 14px;
     font-weight: bold;
-    white-space: nowrap; /* Impede que o nome quebre em várias linhas */
-    box-shadow: 0 0 5px rgba(0,0,0,0.3);
+    transform: rotate(45deg); /* Desfaz a rotação do pino para o número ficar reto */
 }
