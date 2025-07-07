@@ -1,5 +1,5 @@
 // ATENÇÃO: Verifique se esta URL é a correta da sua implantação do Apps Script.
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzeNSPQSZj3kEtcfpKIobRscIMZWSq5RM-dtQT3vRzZ4iOVRNk-Geb_58Df5D_T1lL4/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyHMVnuGn8qpAgrQtS67ApKeQV1T7hdMMSKqLlk1ECbtbI7ZKt5_BUpExcwtbDE_3dD/exec';
 
 // --- FUNÇÕES PARA PESQUEIROS ---
 
