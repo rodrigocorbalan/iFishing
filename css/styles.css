@@ -6,11 +6,12 @@
     width: 100%;
     height: 100%;
     background-color: rgba(255, 255, 255, 0.7);
-    z-index: 9999;
+    z-index: 10000; /* Z-index mais alto */
     display: flex;
     justify-content: center;
     align-items: center;
 }
+
 .spinner {
     border: 8px solid #f3f3f3;
     border-top: 8px solid #3498db;
@@ -19,34 +20,54 @@
     height: 60px;
     animation: spin 1s linear infinite;
 }
+
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+/* Garante que o modal fique na camada superior absoluta */
 #modal {
     z-index: 9999 !important;
 }
+
+/* Força o container do mapa a ter um contexto de empilhamento de baixa prioridade */
 #map-container {
     position: relative;
     z-index: 0;
 }
-.svg-marker-container {
-    position: relative;
-    cursor: pointer;
+
+/* --- ESTILOS PARA MARCADOR COM ETIQUETA DE TEXTO PERMANENTE --- */
+
+/* Container principal que segura o pino e a etiqueta de texto */
+.marker-with-label-container {
     display: flex;
-    justify-content: center;
     align-items: center;
+    /* Remove o fundo e borda padrão que o Leaflet aplica a divIcons */
+    background: transparent;
+    border: none;
+    cursor: pointer;
 }
-.marker-number {
-    position: absolute;
-    top: 13px;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: white;
-    font-size: 12px;
+
+/* O pino SVG */
+.marker-with-label-container svg {
+    filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.7));
+}
+
+/* A etiqueta de texto ao lado do pino */
+.map-text-label {
+    margin-left: 8px; /* Espaço entre o pino e o texto */
+    background: rgba(255, 255, 255, 0.85); /* Fundo branco semi-transparente */
+    padding: 3px 8px;
+    border-radius: 4px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.4); /* Cria o efeito de "moldura" com sombra */
+    color: #333;
+    font-size: 13px;
     font-weight: bold;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    white-space: nowrap; /* Impede que o nome quebre em várias linhas */
 }
+
+/* --- ESTILOS PARA O POPUP CUSTOMIZADO (continua o mesmo) --- */
 .custom-popup .leaflet-popup-content-wrapper {
     background: #ffffff;
     border-radius: 8px;

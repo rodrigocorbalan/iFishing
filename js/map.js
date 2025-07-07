@@ -29,25 +29,25 @@ function addMarkersToMap(pesqueiros, onMarkerClick) {
             const lng = parseFloat(p.Longitude);
             const pinColor = colors[index % colors.length];
 
-            const svgPinIcon = L.divIcon({
-                className: 'custom-marker-wrapper',
+            // --- NOVO ÍCONE: PINO SVG + ETIQUETA DE TEXTO ---
+            const textMarkerIcon = L.divIcon({
+                className: '', // Não precisa de classe wrapper
                 html: `
-                    <div class="svg-marker-container">
-                        <svg width="38" height="38" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.7));">
+                    <div class="marker-with-label-container">
+                        <svg width="32" height="32" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
                             <path fill="${pinColor}" d="M172.268 501.67C26.97 291.031 0 269.413 0 192 0 85.961 85.961 0 192 0s192 85.961 192 192c0 77.413-26.97 99.031-172.268 309.67a24 24 0 01-35.464 0z"></path>
-                            <circle cx="192" cy="192" r="64" fill="white"></circle>
                         </svg>
-                        <span class="marker-number">${index + 1}</span>
+                        <div class="map-text-label">${p.NomePesqueiro}</div>
                     </div>
                 `,
-                iconSize: [38, 38],
-                iconAnchor: [19, 38],
-                popupAnchor: [0, -38]
+                iconSize: null,      // Tamanho automático baseado no conteúdo
+                iconAnchor: [16, 32],  // Ancoragem na ponta inferior do pino
+                popupAnchor: [0, -32]  // Popup abre um pouco acima do pino
             });
 
-            const marker = L.marker([lat, lng], { icon: svgPinIcon }).addTo(map);
+            const marker = L.marker([lat, lng], { icon: textMarkerIcon }).addTo(map);
             
-            // --- CONTEÚDO DO POPUP COM OS ÍCONES LOCAIS ---
+            // O conteúdo do popup e seus eventos continuam os mesmos
             const popupContent = `
                 <div class="popup-main-content">
                     <div class="popup-header">
