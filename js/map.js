@@ -29,9 +29,9 @@ function addMarkersToMap(pesqueiros, onMarkerClick) {
             const lng = parseFloat(p.Longitude);
             const pinColor = colors[index % colors.length];
 
-            // --- VOLTAMOS PARA O ÍCONE DE PINO NUMERADO ---
+            // Marcador continua sendo o pino SVG numerado
             const svgPinIcon = L.divIcon({
-                className: 'custom-marker-wrapper', // Classe wrapper sem estilo
+                className: 'custom-marker-wrapper',
                 html: `
                     <div class="svg-marker-container">
                         <svg width="38" height="38" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.7));">
@@ -43,33 +43,36 @@ function addMarkersToMap(pesqueiros, onMarkerClick) {
                 `,
                 iconSize: [38, 38],
                 iconAnchor: [19, 38],
-                popupAnchor: [0, -35]
+                popupAnchor: [0, -38]
             });
 
             const marker = L.marker([lat, lng], { icon: svgPinIcon }).addTo(map);
             
-            // --- NOVO CONTEÚDO CUSTOMIZADO PARA O POPUP ---
+            // --- NOVO HTML PARA O CONTEÚDO DO POPUP, BASEADO NA SUA SIMULAÇÃO ---
             const popupContent = `
-                <div class="popup-title" style="border-color: ${pinColor};">
-                    ${p.NomePesqueiro}
-                </div>
-                <div class="popup-buttons-container">
-                    <a href="http://googleusercontent.com/maps.google.com/4{lat},${lng}" target="_blank" class="popup-button">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/a/aa/Maps_icon_(2020).svg" alt="Google Maps">
-                        <span>Google Maps</span>
-                    </a>
-                    <a href="https://waze.com/ul?ll=${lat},${lng}&navigate=yes" target="_blank" class="popup-button">
-                        <img src="https://cdn-icons-png.flaticon.com/512/5968/5968848.png" alt="Waze">
-                        <span>Waze</span>
-                    </a>
-                    <a href="#" class="details-link popup-button" data-id="${p.ID}">
-                        <img src="https://cdn-icons-png.flaticon.com/512/157/157933.png" alt="Mais Detalhes">
-                        <span>Detalhes</span>
-                    </a>
+                <div class="popup-main-content">
+                    <div class="popup-header">
+                        <h5>${p.NomePesqueiro}</h5>
+                        <p>${p.CidadeUF}</p>
+                    </div>
+                    <div class="popup-actions">
+                        <a href="http://googleusercontent.com/maps.google.com/5{lat},${lng}" target="_blank" class="action-button">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/a/aa/Maps_icon_(2020).svg" alt="Google Maps">
+                            <span>Google Maps</span>
+                        </a>
+                        <a href="https://waze.com/ul?ll=${lat},${lng}&navigate=yes" target="_blank" class="action-button">
+                            <img src="https://www.waze.com/web/social-share-icon.png" alt="Waze">
+                            <span>Waze</span>
+                        </a>
+                        <a href="#" class="details-link action-button" data-id="${p.ID}">
+                            <img src="https://www.svgrepo.com/show/506597/info-circle.svg" alt="Detalhes">
+                            <span>Detalhes</span>
+                        </a>
+                    </div>
                 </div>
             `;
             
-            // Adiciona a classe 'custom-popup' ao popup
+            // Adiciona a classe 'custom-popup' para aplicar o novo estilo
             marker.bindPopup(popupContent, { className: 'custom-popup' });
 
             marker.on('popupopen', (e) => {
