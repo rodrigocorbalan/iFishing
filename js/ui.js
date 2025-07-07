@@ -17,12 +17,11 @@ async function initUI() {
 }
 
 /**
- * Renderiza a tabela de pesqueiros, agora com uma coluna de numeração.
- * @param {Array<object>} pesqueiros - A lista de pesqueiros para exibir.
+ * Renderiza a tabela de pesqueiros com numeração.
  */
 function renderTable(pesqueiros) {
     const tableBody = document.getElementById('pesqueiros-table-body');
-    tableBody.innerHTML = ''; // Limpa a tabela
+    tableBody.innerHTML = '';
 
     if (pesqueiros.length === 0) {
         tableBody.innerHTML = '<tr><td colspan="8" class="text-center p-4">Nenhum pesqueiro encontrado para este filtro.</td></tr>';
@@ -54,7 +53,6 @@ function renderTable(pesqueiros) {
 
 /**
  * Popula o filtro de espécies de peixes dinamicamente.
- * @param {Array<object>} pesqueiros - A lista completa de pesqueiros.
  */
 function populateFishFilter(pesqueiros) {
     const fishFilter = document.getElementById('fish-filter');
@@ -103,7 +101,7 @@ function applyFilters() {
 }
 
 /**
- * Configura todos os listeners de eventos da página, com correção para o clique nos botões.
+ * Configura todos os listeners de eventos da página.
  */
 function setupEventListeners() {
     document.getElementById('name-filter').addEventListener('input', applyFilters);
@@ -204,6 +202,7 @@ function showDetailsModal(id) {
 
     const peixesHtml = pesqueiro.Peixes ? pesqueiro.Peixes.split(',').map(p => `<span class="bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded">${p.trim()}</span>`).join('') : 'Não informado';
 
+    // --- CONTEÚDO HTML ATUALIZADO COM OS NOVOS BOTÕES ---
     detailsContent.innerHTML = `
         <p class="mb-2"><strong>Endereço:</strong> ${pesqueiro.EnderecoCompleto || 'Não informado'}</p>
         <p class="mb-2"><strong>Cidade/UF:</strong> ${pesqueiro.CidadeUF}</p>
@@ -213,12 +212,31 @@ function showDetailsModal(id) {
         <p class="mb-2"><strong>Aceita Reserva:</strong> ${pesqueiro.AceitaReserva}</p>
         <p class="mb-2"><strong>Site:</strong> <a href="${pesqueiro.Site}" target="_blank" class="text-blue-500 hover:underline">${pesqueiro.Site || 'Nenhum'}</a></p>
         <p class="mb-2"><strong>Instagram:</strong> <a href="${pesqueiro.Instagram}" target="_blank" class="text-blue-500 hover:underline">${pesqueiro.Instagram || 'Nenhum'}</a></p>
-        <div class="mt-4">
-            <a href="https://waze.com/ul?ll=${pesqueiro.Latitude},${pesqueiro.Longitude}&navigate=yes" target="_blank" class="inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                Abrir Rota no Waze
+        
+        <div class="mt-6 pt-4 border-t flex items-center gap-4">
+            <a href="https://www.google.com/maps/dir/?api=1&destination=$${pesqueiro.Latitude},${pesqueiro.Longitude}" target="_blank" class="flex-1 text-center bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                Rota com Google Maps
             </a>
+            <a href="https://waze.com/ul?ll=${pesqueiro.Latitude},${pesqueiro.Longitude}&navigate=yes" target="_blank" class="flex-1 text-center bg-cyan-500 text-white px-4 py-2 rounded hover:bg-cyan-600">
+                Rota com Waze
+            </a>
+            <button id="edit-in-modal-btn" data-id="${pesqueiro.ID}" class="flex-1 text-center bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
+                Editar Pesqueiro
+            </button>
         </div>
     `;
+
+    // --- LÓGICA PARA FAZER O NOVO BOTÃO 'EDITAR' FUNCIONAR ---
+    const editBtnInModal = detailsContent.querySelector('#edit-in-modal-btn');
+    if (editBtnInModal) {
+        editBtnInModal.addEventListener('click', (e) => {
+            const pesqueiroId = e.target.getAttribute('data-id');
+            hideModal(); // Fecha o modal de detalhes
+            setTimeout(() => { // Adiciona um pequeno delay para evitar conflitos de UI
+                showFormModal(pesqueiroId); // Abre o modal de edição
+            }, 100);
+        });
+    }
 
     modal.classList.remove('hidden');
 }
