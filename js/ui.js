@@ -8,9 +8,18 @@ let todosOsPesqueiros = [];
 let pesqueirosFiltrados = [];
 let pesqueiroIdToDelete = null;
 
+// Funções para exibir/ocultar o spinner de carregamento
+function showLoading() {
+    document.getElementById('loader').classList.remove('hidden');
+}
+
+function hideLoading() {
+    document.getElementById('loader').classList.add('hidden');
+}
+
 // Função principal que inicializa a UI
 async function initUI() {
-    showLoading(true);
+    showLoading(); // Removido o 'true' pois a função não espera parâmetro boolean
     try {
         const [pesqueiros, visitas] = await Promise.all([getPesqueiros(), getAllVisitas()]);
         todosOsPesqueiros = pesqueiros;
@@ -25,7 +34,7 @@ async function initUI() {
         console.error("Falha fatal na inicialização da UI:", error);
         alert("Ocorreu um erro grave ao carregar a aplicação. Verifique o console (F12).");
     } finally {
-        showLoading(false);
+        hideLoading(); // Chamada para esconder o loader no 'finally'
     }
 }
 
@@ -226,4 +235,246 @@ function setupEventListeners() {
 }
 
 // O restante das funções (renderTimeline, modais, etc.) pode ser mantido exatamente como está no seu arquivo atual.
-// ...
+// Note: As funções abaixo não foram fornecidas no arquivo `ui.js` inicial,
+// então estou assumindo que elas existem em outro lugar ou você irá adicioná-las.
+// Para um arquivo ui.js completo e funcional, você precisaria delas.
+// Exemplo de como elas seriam:
+
+// Função de exemplo para exibir o modal de formulário (adicionar/editar)
+function showFormModal(id = null) {
+    const modal = document.getElementById('modal');
+    const formContent = document.getElementById('form-content');
+    const detailsContent = document.getElementById('details-content');
+    const modalTitle = document.getElementById('modal-title');
+    const pesqueiroForm = document.getElementById('pesqueiro-form');
+
+    // Limpa o formulário
+    pesqueiroForm.reset();
+    document.getElementById('ID').value = '';
+
+    // Esconde detalhes e mostra o formulário
+    detailsContent.classList.add('hidden');
+    formContent.classList.remove('hidden');
+
+    if (id) {
+        modalTitle.textContent = 'Editar Pesqueiro';
+        const pesqueiro = todosOsPesqueiros.find(p => p.ID == id);
+        if (pesqueiro) {
+            // Preenche o formulário com os dados do pesqueiro
+            for (const key in pesqueiro) {
+                const input = document.getElementById(key);
+                if (input) {
+                    input.value = pesqueiro[key];
+                }
+            }
+        }
+    } else {
+        modalTitle.textContent = 'Adicionar Novo Pesqueiro';
+    }
+    modal.classList.remove('hidden');
+}
+
+// Função de exemplo para exibir o modal de detalhes
+async function showDetailsModal(id, nomePesqueiro) {
+    const modal = document.getElementById('modal');
+    const formContent = document.getElementById('form-content');
+    const detailsContent = document.getElementById('details-content');
+    const modalTitle = document.getElementById('modal-title');
+    const pesqueiroDetailsContainer = document.getElementById('pesqueiro-details-container');
+    const visitasList = document.getElementById('visitas-list');
+    const historicoEmptyState = document.getElementById('historico-empty-state');
+    const visitaPesqueiroIdInput = document.getElementById('visita-pesqueiro-id');
+    
+    // Esconde o formulário e mostra detalhes
+    formContent.classList.add('hidden');
+    detailsContent.classList.remove('hidden');
+
+    modalTitle.textContent = `Detalhes de ${nomePesqueiro}`;
+    
+    // Encontrar o pesqueiro pelos detalhes
+    const pesqueiro = todosOsPesqueiros.find(p => p.ID == id);
+    if (pesqueiro) {
+        pesqueiroDetailsContainer.innerHTML = `
+            <h3 class="text-xl font-bold mb-2">${pesqueiro.NomePesqueiro}</h3>
+            <p><strong>Cidade/UF:</strong> ${pesqueiro.CidadeUF}</p>
+            <p><strong>Tempo sem Trânsito:</strong> ${pesqueiro.TempoSemTransito} min</p>
+            <p><strong>Distância:</strong> ${pesqueiro.Distancia} km</p>
+            <p><strong>Preço Médio:</strong> R$ ${pesqueiro.PrecoMedio}</p>
+            <p><strong>Aceita Reserva:</strong> ${pesqueiro.AceitaReserva}</p>
+            <p><strong>Peixes:</strong> ${pesqueiro.Peixes || 'N/A'}</p>
+            <p><strong>Endereço:</strong> ${pesqueiro.EnderecoCompleto || 'N/A'}</p>
+            <p><strong>Coordenadas:</strong> ${pesqueiro.Latitude || 'N/A'}, ${pesqueiro.Longitude || 'N/A'}</p>
+            <p><strong>Telefone/WhatsApp:</strong> ${pesqueiro.Telefone || 'N/A'}</p>
+            <p><strong>Site:</strong> <a href="${pesqueiro.Site}" target="_blank" class="text-blue-500 hover:underline">${pesqueiro.Site || 'N/A'}</a></p>
+            <p><strong>Instagram:</strong> <a href="${pesqueiro.Instagram}" target="_blank" class="text-blue-500 hover:underline">${pesqueiro.Instagram || 'N/A'}</a></p>
+        `;
+    }
+
+    // Carregar e renderizar histórico de visitas
+    visitasList.innerHTML = '';
+    historicoEmptyState.classList.remove('hidden');
+    const visitas = await getVisitas(id);
+    if (visitas && visitas.length > 0) {
+        historicoEmptyState.classList.add('hidden');
+        visitas.forEach(visita => {
+            const visitaDiv = document.createElement('div');
+            visitaDiv.className = 'bg-gray-50 p-3 rounded-lg border border-gray-200';
+            visitaDiv.innerHTML = `
+                <p class="font-semibold">Data: ${new Date(visita.DataVisita).toLocaleDateString('pt-BR')}</p>
+                <p>Peixes Capturados: ${visita.PeixesCapturados || 'N/A'}</p>
+                <p>Observações: ${visita.Observacoes || 'Nenhuma.'}</p>
+            `;
+            visitasList.appendChild(visitaDiv);
+        });
+    }
+
+    // Preenche o ID do pesqueiro para o formulário de nova visita
+    visitaPesqueiroIdInput.value = id;
+
+    // Configurar abas do modal de detalhes
+    document.getElementById('tab-historico').addEventListener('click', (e) => {
+        e.preventDefault();
+        document.getElementById('content-historico').classList.remove('hidden');
+        document.getElementById('content-registrar').classList.add('hidden');
+        document.getElementById('tab-historico').classList.add('border-blue-500', 'text-blue-600');
+        document.getElementById('tab-historico').classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+        document.getElementById('tab-registrar').classList.remove('border-blue-500', 'text-blue-600');
+        document.getElementById('tab-registrar').classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+    });
+
+    document.getElementById('tab-registrar').addEventListener('click', (e) => {
+        e.preventDefault();
+        document.getElementById('content-historico').classList.add('hidden');
+        document.getElementById('content-registrar').classList.remove('hidden');
+        document.getElementById('tab-registrar').classList.add('border-blue-500', 'text-blue-600');
+        document.getElementById('tab-registrar').classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+        document.getElementById('tab-historico').classList.remove('border-blue-500', 'text-blue-600');
+        document.getElementById('tab-historico').classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+    });
+
+    // Garante que a aba "Histórico" é a inicial
+    document.getElementById('tab-historico').click();
+
+    modal.classList.remove('hidden');
+}
+
+// Função de exemplo para exibir o modal de confirmação de exclusão
+function showConfirmDeleteModal(id, nome) {
+    pesqueiroIdToDelete = id;
+    document.getElementById('pesqueiro-to-delete-name').textContent = nome;
+    document.getElementById('confirm-delete-modal').classList.remove('hidden');
+}
+
+// Listeners dos botões dos modais
+document.querySelectorAll('.modal-close-btn').forEach(button => {
+    button.addEventListener('click', () => {
+        document.getElementById('modal').classList.add('hidden');
+        document.getElementById('confirm-delete-modal').classList.add('hidden');
+    });
+});
+
+document.querySelectorAll('.modal-bg').forEach(bg => {
+    bg.addEventListener('click', () => {
+        document.getElementById('modal').classList.add('hidden');
+        document.getElementById('confirm-delete-modal').classList.add('hidden');
+    });
+});
+
+document.getElementById('btn-cancel-delete').addEventListener('click', () => {
+    document.getElementById('confirm-delete-modal').classList.add('hidden');
+});
+
+document.getElementById('btn-confirm-delete').addEventListener('click', async () => {
+    showLoading();
+    const result = await deletePesqueiro(pesqueiroIdToDelete);
+    hideLoading();
+    document.getElementById('confirm-delete-modal').classList.add('hidden');
+    if (result.status === 'success') {
+        alert('Pesqueiro excluído com sucesso!');
+        initUI(); // Recarrega a UI após a exclusão
+    } else {
+        alert('Erro ao excluir pesqueiro: ' + (result.message || 'Erro desconhecido.'));
+    }
+});
+
+
+document.getElementById('pesqueiro-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    showLoading();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+
+    let result;
+    if (data.ID) {
+        result = await updatePesqueiro(data);
+    } else {
+        result = await createPesqueiro(data);
+    }
+    hideLoading();
+    document.getElementById('modal').classList.add('hidden');
+    if (result.status === 'success') {
+        alert('Pesqueiro salvo com sucesso!');
+        initUI(); // Recarrega a UI após salvar
+    } else {
+        alert('Erro ao salvar pesqueiro: ' + (result.message || 'Erro desconhecido.'));
+    }
+});
+
+document.getElementById('visita-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    showLoading();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+    
+    // Garante que o ID do pesqueiro esteja presente nos dados da visita
+    data.PesqueiroID = document.getElementById('visita-pesqueiro-id').value;
+
+    const result = await createVisita(data);
+    hideLoading();
+    document.getElementById('modal').classList.add('hidden');
+    if (result.status === 'success') {
+        alert('Visita registrada com sucesso!');
+        initUI(); // Recarrega a UI (incluindo timeline e possíveis detalhes)
+    } else {
+        alert('Erro ao registrar visita: ' + (result.message || 'Erro desconhecido.'));
+    }
+});
+
+// Função para renderizar a timeline de visitas
+function renderTimeline(visitas) {
+    const timelineContainer = document.getElementById('timeline-container');
+    const timelineLoading = document.getElementById('timeline-loading');
+    
+    if (!timelineContainer) return; // Garante que o elemento existe
+
+    timelineContainer.innerHTML = ''; // Limpa o conteúdo existente
+    
+    if (!visitas || visitas.length === 0) {
+        timelineContainer.innerHTML = '<p class="text-gray-500 p-4 text-center">Nenhuma visita recente para exibir.</p>';
+        return;
+    }
+
+    // Ordena as visitas por data (mais recente primeiro)
+    visitas.sort((a, b) => new Date(b.DataVisita) - new Date(a.DataVisita));
+
+    // Exibe apenas as 5 visitas mais recentes para a timeline na página principal
+    const visitasRecentes = visitas.slice(0, 5);
+
+    visitasRecentes.forEach(visita => {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'timeline-item';
+        itemDiv.innerHTML = `
+            <div>
+                <p class="text-gray-500 text-xs">${new Date(visita.DataVisita).toLocaleDateString('pt-BR')}</p>
+                <h4 class="font-semibold text-gray-800">${visita.PesqueiroNome}</h4>
+                <p class="text-gray-700 text-sm">${visita.PeixesCapturados ? `Peixes: ${visita.PeixesCapturados}` : ''}</p>
+                <p class="text-gray-600 text-xs">${visita.Observacoes || 'Sem observações.'}</p>
+            </div>
+        `;
+        timelineContainer.appendChild(itemDiv);
+    });
+
+    if (timelineLoading) {
+        timelineLoading.style.display = 'none'; // Esconde o "Carregando"
+    }
+}
