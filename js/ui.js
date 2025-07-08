@@ -17,24 +17,35 @@ function hideLoading() {
     document.getElementById('loader').classList.add('hidden');
 }
 
-// Função principal que inicializa a UI
+// >>>>> FUNÇÃO MODIFICADA PARA DEBUG <<<<<
+// Função principal que inicializa a UI com os logs para debug
 async function initUI() {
-    showLoading(); // Removido o 'true' pois a função não espera parâmetro boolean
+    console.log("--- INICIANDO DEBUG ---");
+    console.log("1. initUI: Começou. Mostrando o loader.");
+    showLoading(); 
     try {
         const [pesqueiros, visitas] = await Promise.all([getPesqueiros(), getAllVisitas()]);
+        console.log("2. initUI: Dados da API recebidos com sucesso.");
+        
         todosOsPesqueiros = pesqueiros;
         pesqueirosFiltrados = [...todosOsPesqueiros];
         
-        sortAndRerender(); // Ordena e exibe a primeira página
+        console.log("3. initUI: Chamando a função sortAndRerender para ordenar e exibir a tabela.");
+        sortAndRerender(); 
+        console.log("4. initUI: A função sortAndRerender foi CONCLUÍDA.");
         
         populateFishFilter(todosOsPesqueiros);
         renderTimeline(visitas);
         setupEventListeners();
+        console.log("5. initUI: Restante da UI foi configurado.");
+
     } catch (error) {
-        console.error("Falha fatal na inicialização da UI:", error);
+        console.error("ERRO FATAL NA INICIALIZAÇÃO:", error);
         alert("Ocorreu um erro grave ao carregar a aplicação. Verifique o console (F12).");
     } finally {
-        hideLoading(); // Chamada para esconder o loader no 'finally'
+        console.log("6. initUI: Bloco 'finally' executado. Escondendo o loader.");
+        hideLoading();
+        console.log("--- FIM DO DEBUG ---");
     }
 }
 
