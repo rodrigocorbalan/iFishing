@@ -162,3 +162,12 @@ body {
     top: 5px;
     border: 2px solid white;
 }
+
+/* --- ESTILO PARA ORDENAÇÃO DA TABELA --- */
+.sortable-header {
+    cursor: pointer;
+    user-select: none; /* Impede que o texto seja selecionado ao clicar */
+}
+.sortable-header:hover {
+    background-color: #e5e7eb; /* Um cinza um pouco mais escuro no hover */
+}
