@@ -171,3 +171,8 @@ body {
 .sortable-header:hover {
     background-color: #e5e7eb; /* Um cinza um pouco mais escuro no hover */
 }
+
+/* styles.css */
+#loader.hidden {
+    display: none; /* Remova o !important */
+}
