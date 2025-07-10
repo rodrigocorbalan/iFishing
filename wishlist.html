@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha Wishlist de Pesca</title>
+    <link rel="icon" type="image/png" href="img/fishing.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        /* Estilos adicionais para a wishlist */
+        .wishlist-item {
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            display: flex;
+            flex-direction: column; /* Coloca detalhes e ações em colunas */
+            gap: 0.5rem;
+        }
+        .wishlist-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .wishlist-item-details p {
+            font-size: 0.875rem; /* text-sm */
+            color: #4b5563; /* gray-700 */
+        }
+        .wishlist-item-actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end; /* Alinha botões à direita */
+            flex-wrap: wrap; /* Permite que os botões quebrem linha */
+        }
+        /* Estilos para o modal da wishlist */
+        #wishlist-modal {
+            z-index: 9999 !important;
+        }
+        /* Garantir que o loader ainda funciona aqui */
+        #loader.hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-sm">
+    <div id="loader" class="hidden"><div class="spinner"></div></div>
+    <header class="bg-blue-600 text-white p-3 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center">
+                <img src="img/fishing.png" alt="Ícone de peixe" class="h-7 w-7 mr-2">
+                <h1 class="text-xl font-bold">Minha Wishlist de Pesca</h1>
+            </div>
+            <a href="index.html" class="bg-white text-blue-600 font-semibold px-3 py-1.5 rounded hover:bg-gray-200 text-sm">Voltar à Lista de Pesqueiros</a>
+        </div>
+    </header>
+    <main class="container mx-auto p-4">
+        <section id="wishlist-section" class="bg-white p-3 rounded-lg shadow">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-semibold">Itens Desejados</h2>
+                <button id="add-wishlist-item-btn" class="bg-blue-600 text-white font-semibold px-3 py-1.5 rounded hover:bg-blue-700 text-sm">+ Adicionar Item</button>
+            </div>
+            
+            <div id="wishlist-container" class="space-y-4">
+                <p id="wishlist-loading" class="text-gray-500 text-center">Carregando wishlist...</p>
+                <p id="wishlist-empty-state" class="hidden text-gray-500 text-center">Sua wishlist está vazia.</p>
+            </div>
+        </section>
+    </main>
+
+    <div id="wishlist-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center p-4">
+        <div class="modal-bg fixed inset-0"></div>
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl z-10 max-h-[90vh] flex flex-col">
+            <div class="p-4 border-b flex justify-between items-center">
+                <h2 id="wishlist-modal-title" class="text-2xl font-semibold">Adicionar Novo Item</h2>
+                <button class="wishlist-modal-close-btn text-gray-500 hover:text-gray-800 text-3xl">×</button>
+            </div>
+            <div class="p-6 overflow-y-auto">
+                <form id="wishlist-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="hidden" id="wishlist-item-id" name="ID">
+                    
+                    <div class="md:col-span-2">
+                        <label for="NomeItem" class="block text-sm font-medium text-gray-700">Nome do Item</label>
+                        <input type="text" name="NomeItem" id="NomeItem" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
+                    </div>
+
+                    <div>
+                        <label for="Categoria" class="block text-sm font-medium text-gray-700">Categoria</label>
+                        <select name="Categoria" id="Categoria" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                            <option value="">Selecione</option>
+                            <option value="Vara">Vara</option>
+                            <option value="Carretilha">Carretilha</option>
+                            <option value="Molinete">Molinete</option>
+                            <option value="Linha">Linha</option>
+                            <option value="Anzol">Anzol</option>
+                            <option value="Acessorio">Acessório</option>
+                            <option value="Isca">Isca</option>
+                            <option value="Caixa">Caixa</option>
+                            <option value="Eletronico">Eletrônico</option>
+                            <option value="Outros">Outros</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="TipoPesca" class="block text-sm font-medium text-gray-700">Tipo de Pesca</label>
+                        <select name="TipoPesca" id="TipoPesca" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                            <option value="">Selecione</option>
+                            <option value="Ultra light">Ultra light</option>
+                            <option value="Cevadeira">Cevadeira</option>
+                            <option value="Carpa Cabecuda">Carpa Cabeçuda</option>
+                            <option value="Peixe de Couro">Peixe de Couro</option>
+                            <option value="Massa de Fundo">Massa de Fundo</option>
+                            <option value="Outros">Outros</option>
+                        </select>
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label for="MarcaModelo" class="block text-sm font-medium text-gray-700">Marca/Modelo</label>
+                        <input type="text" name="MarcaModelo" id="MarcaModelo" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label for="Especificacoes" class="block text-sm font-medium text-gray-700">Especificações</label>
+                        <textarea name="Especificacoes" id="Especificacoes" rows="2" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" placeholder="Ex: Ação rápida, 10-20lb, 2.70m, monofilamento..."></textarea>
+                    </div>
+
+                    <div>
+                        <label for="PrecoEstimado" class="block text-sm font-medium text-gray-700">Preço Estimado (R$)</label>
+                        <input type="number" step="0.01" name="PrecoEstimado" id="PrecoEstimado" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                    </div>
+
+                    <div>
+                        <label for="LinkCompra" class="block text-sm font-medium text-gray-700">Link para Compra</label>
+                        <input type="url" name="LinkCompra" id="LinkCompra" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" placeholder="Ex: https://www.mercadolivre.com.br/...">
+                    </div>
+
+                    <div>
+                        <label for="Prioridade" class="block text-sm font-medium text-gray-700">Prioridade</label>
+                        <select name="Prioridade" id="Prioridade" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                            <option value="">Selecione</option>
+                            <option value="Alta">Alta</option>
+                            <option value="Media">Média</option>
+                            <option value="Baixa">Baixa</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="Status" class="block text-sm font-medium text-gray-700">Status</label>
+                        <select name="Status" id="Status" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                            <option value="">Selecione</option>
+                            <option value="Desejado">Desejado</option>
+                            <option value="Pesquisando">Pesquisando</option>
+                            <option value="Ja comprei">Já comprei</option>
+                            <option value="Ganhei">Ganhei</option>
+                            <option value="Desisti">Desisti</option>
+                        </select>
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label for="NotasPessoais" class="block text-sm font-medium text-gray-700">Notas Pessoais</label>
+                        <textarea name="NotasPessoais" id="NotasPessoais" rows="3" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" placeholder="Observações sobre uso pretendido, feedback de amigos, alternativas, etc."></textarea>
+                    </div>
+
+                    <input type="hidden" name="DataAdicionado" id="DataAdicionado">
+                    <input type="hidden" name="PesqueiroID" id="PesqueiroID">
+
+                    <div class="md:col-span-2 text-right">
+                        <button type="submit" class="bg-blue-600 text-white font-semibold px-6 py-2 rounded hover:bg-blue-700">Salvar Item</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div id="confirm-delete-wishlist-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center p-4 z-50">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div class="p-6 text-center">
+                <svg class="mx-auto mb-4 w-14 h-14 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <h3 class="mb-5 text-lg font-normal text-gray-500">Você tem certeza que deseja excluir o item <br> <strong id="item-to-delete-name" class="text-gray-800"></strong> da sua wishlist?</h3>
+                <button id="btn-confirm-delete-wishlist" class="text-white bg-red-600 hover:bg-red-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2">Sim, tenho certeza</button>
+                <button id="btn-cancel-delete-wishlist" class="text-gray-500 bg-white hover:bg-gray-100 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900">Não, cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/wishlist.js"></script>
+    <script>
+        // Inicializa a UI da wishlist
+        document.addEventListener('DOMContentLoaded', function() {
+            initWishlistUI();
+        });
+    </script>
+</body>
+</html>

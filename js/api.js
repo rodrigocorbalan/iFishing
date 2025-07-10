@@ -84,3 +84,44 @@ async function postData(action, data) {
         return { status: 'error', message: error.message };
     }
 }
+
+
+// --- FUNÇÕES PARA WISHLIST ---
+
+/**
+ * Adiciona um novo item à wishlist.
+ * @param {object} itemData Os dados do novo item (ex: { NomeItem: '...', Categoria: '...' }).
+ */
+function createWishlistItem(itemData) {
+    return postData('createWishlistItem', itemData);
+}
+
+/**
+ * Busca todos os itens da wishlist.
+ */
+async function getAllWishlistItems() {
+    try {
+        const response = await fetch(`${SCRIPT_URL}?action=readAllWishlistItems`);
+        if (!response.ok) throw new Error(`Erro na requisição: ${response.statusText}`);
+        return await response.json();
+    } catch (error) {
+        console.error("Falha ao buscar itens da wishlist:", error);
+        return [];
+    }
+}
+
+/**
+ * Atualiza um item existente na wishlist.
+ * @param {object} itemData Os dados atualizados do item, incluindo o ID.
+ */
+function updateWishlistItem(itemData) { // NOVA FUNÇÃO
+    return postData('updateWishlistItem', itemData);
+}
+
+/**
+ * Remove um item da wishlist.
+ * @param {string} itemId O ID do item a ser removido.
+ */
+function deleteWishlistItem(itemId) {
+    return postData('deleteWishlistItem', { ID: itemId });
+}
