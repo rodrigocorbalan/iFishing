@@ -192,19 +192,37 @@ function renderPesqueiroPagination() {
     paginationControls.appendChild(createButton('Próximo', pesqueiroCurrentPage + 1, pesqueiroCurrentPage === totalPages));
 }
 
+// Versão nova que ordena a lista
 function populateFishFilter(pesqueiros) {
     const fishFilter = document.getElementById('fish-filter');
     if (!fishFilter) return;
+
+    // 1. Coleta todas as espécies únicas em um Set para evitar duplicatas
     const allFish = new Set();
     pesqueiros.forEach(p => {
-        if (p.Peixes) p.Peixes.split(',').forEach(fish => allFish.add(fish.trim()));
-    });
-    while (fishFilter.options.length > 1) fishFilter.remove(1);
-    allFish.forEach(fish => {
-        if (fish) {
-            const option = new Option(fish, fish);
-            fishFilter.add(option);
+        if (p.Peixes) {
+            p.Peixes.split(',').forEach(fish => {
+                const trimmedFish = fish.trim();
+                if (trimmedFish) { // Garante que não adiciona strings vazias
+                    allFish.add(trimmedFish);
+                }
+            });
         }
+    });
+
+    // 2. Converte o Set para um Array e ordena alfabeticamente
+    // Usamos localeCompare para uma ordenação correta de caracteres em português (como 'Á', 'Ç')
+    const sortedFish = Array.from(allFish).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+
+    // 3. Limpa as opções antigas do filtro (mantendo a primeira "Todas")
+    while (fishFilter.options.length > 1) {
+        fishFilter.remove(1);
+    }
+
+    // 4. Adiciona as novas opções já ordenadas
+    sortedFish.forEach(fish => {
+        const option = new Option(fish, fish); // new Option(texto, valor)
+        fishFilter.add(option);
     });
 }
 
