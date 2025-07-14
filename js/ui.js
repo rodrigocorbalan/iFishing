@@ -1,108 +1,101 @@
-// Variáveis globais para paginação e ordenação
-let currentPage = 1;
-const rowsPerPage = 10;
-let sortColumn = 'Distancia'; // Coluna de ordenação padrão
-let sortDirection = 'asc';    // Direção padrão (ascendente)
+// ===================================================================
+//              VARIÁVEIS GLOBAIS
+// ===================================================================
 
+// Variáveis para a Lista de Pesqueiros
+let pesqueiroCurrentPage = 1;
+const pesqueiroRowsPerPage = 10;
+let pesqueiroSortColumn = 'Distancia';
+let pesqueiroSortDirection = 'asc';
 let todosOsPesqueiros = [];
 let pesqueirosFiltrados = [];
 let pesqueiroIdToDelete = null;
 
-// Funções para exibir/ocultar o spinner de carregamento
-function showLoading() {
-    document.getElementById('loader').classList.remove('hidden');
-    console.log("DEBUG: showLoading - Loader visível.");
-}
+// Variáveis para a Wishlist
+let wishlistCurrentPage = 1;
+const wishlistRowsPerPage = 10;
+let todosOsWishlistItems = [];
+let wishlistItemIdToDelete = null;
 
-function hideLoading() {
-    const loaderEl = document.getElementById('loader');
-    if (loaderEl) {
-        loaderEl.classList.add('hidden');
-        console.log("DEBUG: hideLoading - Classe 'hidden' adicionada ao loader.");
-    } else {
-        console.error("DEBUG: hideLoading - Elemento #loader não encontrado!");
-    }
-}
 
-// Função principal que inicializa a UI com os logs para debug
+// ===================================================================
+//              FUNÇÕES GERAIS DE UI
+// ===================================================================
+
+function showLoading() { document.getElementById('loader').classList.remove('hidden'); }
+function hideLoading() { document.getElementById('loader').classList.add('hidden'); }
+
+// Função principal de inicialização da Interface
 async function initUI() {
-    console.log("--- INICIANDO DEBUG UI ---");
-    console.log("1. initUI: Começou. Mostrando o loader.");
-    showLoading(); 
+    showLoading();
     try {
-        // Usa Promise.all para buscar ambos os conjuntos de dados em paralelo
-        const [pesqueiros, visitas] = await Promise.all([getPesqueiros(), getAllVisitas()]);
-        console.log("2. initUI: Dados da API (Pesqueiros e Visitas) recebidos com sucesso.");
+        const [pesqueiros, visitas, wishlistItems] = await Promise.all([
+            getPesqueiros(),
+            getAllVisitas(),
+            getAllWishlistItems()
+        ]);
         
+        // Processa Pesqueiros
         todosOsPesqueiros = pesqueiros;
-        pesqueirosFiltrados = [...todosOsPesqueiros]; // Inicializa filtrados com todos
-        
-        console.log("3. initUI: Chamando a função sortAndRerender para ordenar e exibir a tabela.");
-        sortAndRerender(); // Ordena e renderiza a tabela (e chama displayPage(1))
-        
+        pesqueirosFiltrados = [...todosOsPesqueiros];
+        sortAndRerenderPesqueiros();
         populateFishFilter(todosOsPesqueiros);
+        addMarkersToMap(pesqueirosFiltrados, (id, nome) => showDetailsModal(id, nome));
+
+        // Processa Wishlist
+        todosOsWishlistItems = wishlistItems;
+        displayWishlistPage(1);
         
+        // Processa Componentes Visuais
         renderTimeline(visitas);
         initYearCalendar(visitas);
-
+        
         setupEventListeners();
-        console.log("5. initUI: Restante da UI foi configurado e event listeners ativados.");
-
-        setTimeout(() => {
-            console.log("6. initUI: Timeout concluído. Escondendo o loader.");
-            hideLoading();
-            console.log("--- FIM DO DEBUG UI ---");
-        }, 500);
-
+        hideLoading();
     } catch (error) {
         console.error("ERRO FATAL NA INICIALIZAÇÃO DA UI:", error);
-        alert("Ocorreu um erro grave ao carregar a aplicação. Verifique o console (F12) para mais detalhes.");
-        hideLoading(); // Garante que o loader seja escondido mesmo em caso de erro
+        alert("Ocorreu um erro grave ao carregar a aplicação.");
+        hideLoading();
     }
 }
 
-// Exibe uma página específica da tabela e atualiza os controles de paginação
-function displayPage(page) {
-    currentPage = page;
-    renderTable();
-    renderPagination();
+
+// ===================================================================
+//              FUNÇÕES DA WISHLIST
+// ===================================================================
+
+function displayWishlistPage(page) {
+    wishlistCurrentPage = page;
+    renderWishlistTable();
+    renderWishlistPagination();
 }
 
-// Renderiza a tabela usando uma "fatia" dos dados baseada na página atual
-function renderTable() {
-    const tableBody = document.getElementById('pesqueiros-table-body');
-    if (!tableBody) {
-        console.error("DEBUG: renderTable - Elemento #pesqueiros-table-body não encontrado.");
-        return;
-    }
+function renderWishlistTable() {
+    const tableBody = document.getElementById('wishlist-table-body');
+    if (!tableBody) return;
     tableBody.innerHTML = '';
 
-    const startIndex = (currentPage - 1) * rowsPerPage;
-    const endIndex = startIndex + rowsPerPage;
-    const paginatedItems = pesqueirosFiltrados.slice(startIndex, endIndex);
+    const startIndex = (wishlistCurrentPage - 1) * wishlistRowsPerPage;
+    const endIndex = startIndex + wishlistRowsPerPage;
+    const paginatedItems = todosOsWishlistItems.slice(startIndex, endIndex);
 
-    if (paginatedItems.length === 0 && currentPage === 1) {
-        tableBody.innerHTML = '<tr><td colspan="8" class="text-center p-4">Nenhum pesqueiro encontrado com os filtros aplicados.</td></tr>';
+    if (paginatedItems.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="4" class="text-center p-4">Nenhum item na sua wishlist.</td></tr>';
         return;
     }
-    
-    paginatedItems.forEach((p, index) => {
+
+    paginatedItems.forEach(item => {
         const tr = document.createElement('tr');
-        tr.className = 'hover:bg-gray-100 cursor-pointer';
-        tr.setAttribute('data-id', p.ID);
-        const itemNumber = startIndex + index + 1;
+        tr.className = 'hover:bg-gray-100 cursor-pointer item-row';
+        tr.setAttribute('data-id', item.ID);
         tr.innerHTML = `
-            <td class="p-1.5 border-t text-center font-medium">${itemNumber}</td>
-            <td class="p-1.5 border-t">${p.NomePesqueiro}</td>
-            <td class="p-1.5 border-t">${p.CidadeUF}</td>
-            <td class="p-1.5 border-t">${p.TempoSemTransito || 'N/A'} min</td>
-            <td class="p-1.5 border-t">${p.Distancia || 'N/A'} km</td>
-            <td class="p-1.5 border-t">R$ ${p.PrecoMedio || 'N/A'}</td>
-            <td class="p-1.5 border-t">${p.AceitaReserva || 'N/A'}</td>
-            <td class="p-1.5 border-t">
-                <div class="flex gap-2">
-                    <button class="btn-edit text-xs bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded">Editar</button>
-                    <button class="btn-delete text-xs bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">Excluir</button>
+            <td class="p-2 border-t">${item.NomeItem || 'N/A'}</td>
+            <td class="p-2 border-t">R$ ${item.PrecoEstimado ? parseFloat(item.PrecoEstimado).toFixed(2) : 'N/A'}</td>
+            <td class="p-2 border-t">${item.Status || 'N/A'}</td>
+            <td class="p-2 border-t text-right">
+                <div class="flex gap-2 justify-end">
+                    <button class="btn-edit-wishlist text-xs bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded">Editar</button>
+                    <button class="btn-delete-wishlist text-xs bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">Remover</button>
                 </div>
             </td>
         `;
@@ -110,359 +103,384 @@ function renderTable() {
     });
 }
 
-// Renderiza os botões de controle da paginação
-function renderPagination() {
-    const paginationControls = document.getElementById('pagination-controls');
-    if (!paginationControls) {
-        console.error("DEBUG: renderPagination - Elemento #pagination-controls não encontrado.");
-        return;
-    }
+function renderWishlistPagination() {
+    const paginationControls = document.getElementById('wishlist-pagination-controls');
+    if (!paginationControls) return;
     paginationControls.innerHTML = '';
-    const totalPages = Math.ceil(pesqueirosFiltrados.length / rowsPerPage);
+    const totalPages = Math.ceil(todosOsWishlistItems.length / wishlistRowsPerPage);
 
     if (totalPages <= 1) return;
 
-    const prevButton = document.createElement('button');
-    prevButton.textContent = 'Anterior';
-    prevButton.className = 'pagination-btn bg-gray-200 text-gray-700 px-3 py-1 rounded-md text-sm hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed';
-    prevButton.disabled = currentPage === 1;
-    prevButton.addEventListener('click', () => displayPage(currentPage - 1));
-    paginationControls.appendChild(prevButton);
-
+    const createButton = (text, page, isDisabled = false, isCurrent = false) => {
+        const button = document.createElement('button');
+        button.textContent = text;
+        button.className = `pagination-btn px-3 py-1 rounded-md text-sm ${isCurrent ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'} ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`;
+        button.disabled = isDisabled;
+        button.addEventListener('click', () => displayWishlistPage(page));
+        return button;
+    };
+    
+    paginationControls.appendChild(createButton('Anterior', wishlistCurrentPage - 1, wishlistCurrentPage === 1));
     for (let i = 1; i <= totalPages; i++) {
-        const pageButton = document.createElement('button');
-        pageButton.textContent = i;
-        pageButton.className = `pagination-btn px-3 py-1 rounded-md text-sm ${i === currentPage ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`;
-        pageButton.addEventListener('click', () => displayPage(i));
-        paginationControls.appendChild(pageButton);
+        paginationControls.appendChild(createButton(i, i, false, i === wishlistCurrentPage));
     }
-
-    const nextButton = document.createElement('button');
-    nextButton.textContent = 'Próximo';
-    nextButton.className = 'pagination-btn bg-gray-200 text-gray-700 px-3 py-1 rounded-md text-sm hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed';
-    nextButton.disabled = currentPage === totalPages;
-    nextButton.addEventListener('click', () => displayPage(currentPage + 1));
-    paginationControls.appendChild(nextButton);
+    paginationControls.appendChild(createButton('Próximo', wishlistCurrentPage + 1, wishlistCurrentPage === totalPages));
 }
 
-// Popula o filtro de espécies de peixes
-function populateFishFilter(pesqueiros) {
-    const fishFilter = document.getElementById('fish-filter');
-    if (!fishFilter) {
-        console.error("DEBUG: populateFishFilter - Elemento #fish-filter não encontrado.");
+function showWishlistDetailsModal(item) {
+    const modal = document.getElementById('wishlist-details-modal');
+    const title = document.getElementById('wishlist-details-title');
+    const content = document.getElementById('wishlist-details-content');
+    if (!modal || !title || !content) return;
+    
+    title.textContent = item.NomeItem;
+    content.innerHTML = `
+        <div class="space-y-2 text-sm">
+            <p><strong>Categoria:</strong> ${item.Categoria || 'N/A'}</p>
+            <p><strong>Tipo de Pesca:</strong> ${item.TipoPesca || 'N/A'}</p>
+            <p><strong>Marca/Modelo:</strong> ${item.MarcaModelo || 'N/A'}</p>
+            <p><strong>Especificações:</strong> ${item.Especificacoes || 'N/A'}</p>
+            <p><strong>Preço Estimado:</strong> R$ ${item.PrecoEstimado ? parseFloat(item.PrecoEstimado).toFixed(2) : 'N/A'}</p>
+            <p><strong>Link:</strong> ${item.LinkCompra ? `<a href="${item.LinkCompra}" target="_blank" class="text-blue-500 hover:underline">Abrir Link</a>` : 'N/A'}</p>
+            <p><strong>Prioridade:</strong> ${item.Prioridade || 'N/A'}</p>
+            <p><strong>Status:</strong> ${item.Status || 'N/A'}</p>
+            <p class="mt-4"><strong>Notas:</strong></p>
+            <p class="whitespace-pre-wrap bg-gray-50 p-2 rounded border">${item.NotasPessoais || 'Nenhuma.'}</p>
+        </div>
+    `;
+    modal.classList.remove('hidden');
+}
+
+function showWishlistFormModal(itemData = null) {
+    const modal = document.getElementById('wishlist-form-modal');
+    const title = document.getElementById('wishlist-form-title');
+    const form = document.getElementById('wishlist-form');
+    if (!modal || !title || !form) return;
+
+    form.reset();
+    document.getElementById('wishlist-item-id').value = '';
+
+    if (itemData) {
+        title.textContent = 'Editar Item da Wishlist';
+        // Preenche o formulário com os dados do item
+        for (const key in itemData) {
+            if (form.elements[key]) {
+                form.elements[key].value = itemData[key];
+            }
+        }
+    } else {
+        title.textContent = 'Adicionar Novo Item';
+    }
+    modal.classList.remove('hidden');
+}
+
+function showWishlistDeleteConfirmModal(id, nome) {
+    wishlistItemIdToDelete = id;
+    const modal = document.getElementById('confirm-delete-wishlist-modal');
+    const nameEl = document.getElementById('item-to-delete-name');
+    if (modal && nameEl) {
+        nameEl.textContent = nome;
+        modal.classList.remove('hidden');
+    }
+}
+
+
+// ===================================================================
+//              FUNÇÕES DOS PESQUEIROS
+// ===================================================================
+
+function displayPesqueiroPage(page) {
+    pesqueiroCurrentPage = page;
+    renderPesqueiroTable();
+    renderPesqueiroPagination();
+}
+
+function renderPesqueiroTable() {
+    const tableBody = document.getElementById('pesqueiros-table-body');
+    if (!tableBody) return;
+    tableBody.innerHTML = '';
+    const startIndex = (pesqueiroCurrentPage - 1) * pesqueiroRowsPerPage;
+    const endIndex = startIndex + pesqueiroRowsPerPage;
+    const paginatedItems = pesqueirosFiltrados.slice(startIndex, endIndex);
+
+    if (paginatedItems.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="8" class="text-center p-4">Nenhum pesqueiro encontrado.</td></tr>';
         return;
     }
+    paginatedItems.forEach((p, index) => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-gray-100 cursor-pointer';
+        tr.setAttribute('data-id', p.ID);
+        tr.innerHTML = `
+            <td class="p-1.5 border-t text-center font-medium">${startIndex + index + 1}</td>
+            <td class="p-1.5 border-t">${p.NomePesqueiro}</td>
+            <td class="p-1.5 border-t">${p.CidadeUF}</td>
+            <td class="p-1.5 border-t">${p.TempoSemTransito || 'N/A'} min</td>
+            <td class="p-1.5 border-t">${p.Distancia || 'N/A'} km</td>
+            <td class="p-1.5 border-t">R$ ${p.PrecoMedio || 'N/A'}</td>
+            <td class="p-1.5 border-t">${p.AceitaReserva || 'N/A'}</td>
+            <td class="p-1.5 border-t"><div class="flex gap-2"><button class="btn-edit text-xs bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded">Editar</button><button class="btn-delete text-xs bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">Excluir</button></div></td>
+        `;
+        tableBody.appendChild(tr);
+    });
+}
+
+function renderPesqueiroPagination() {
+    const paginationControls = document.getElementById('pagination-controls');
+    if (!paginationControls) return;
+    paginationControls.innerHTML = '';
+    const totalPages = Math.ceil(pesqueirosFiltrados.length / pesqueiroRowsPerPage);
+    if (totalPages <= 1) return;
+
+    const createButton = (text, page, isDisabled = false, isCurrent = false) => {
+        const button = document.createElement('button');
+        button.textContent = text;
+        button.className = `pagination-btn px-3 py-1 rounded-md text-sm ${isCurrent ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'} ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`;
+        button.disabled = isDisabled;
+        button.addEventListener('click', () => displayPesqueiroPage(page));
+        return button;
+    };
+
+    paginationControls.appendChild(createButton('Anterior', pesqueiroCurrentPage - 1, pesqueiroCurrentPage === 1));
+    for (let i = 1; i <= totalPages; i++) {
+        paginationControls.appendChild(createButton(i, i, false, i === pesqueiroCurrentPage));
+    }
+    paginationControls.appendChild(createButton('Próximo', pesqueiroCurrentPage + 1, pesqueiroCurrentPage === totalPages));
+}
+
+function populateFishFilter(pesqueiros) {
+    const fishFilter = document.getElementById('fish-filter');
+    if (!fishFilter) return;
     const allFish = new Set();
     pesqueiros.forEach(p => {
         if (p.Peixes) p.Peixes.split(',').forEach(fish => allFish.add(fish.trim()));
     });
-    // Remove opções antigas, exceto a primeira "Todas"
-    while (fishFilter.options.length > 1) {
-        fishFilter.remove(1);
-    }
+    while (fishFilter.options.length > 1) fishFilter.remove(1);
     allFish.forEach(fish => {
-        if (fish) { // Garante que não adiciona strings vazias
-            const option = document.createElement('option');
-            option.value = fish;
-            option.textContent = fish;
-            fishFilter.appendChild(option);
+        if (fish) {
+            const option = new Option(fish, fish);
+            fishFilter.add(option);
         }
     });
 }
 
-// Aplica os filtros e reordena os resultados
 function applyFilters() {
-    console.log("DEBUG: applyFilters - Aplicando filtros...");
     const nameFilterValue = document.getElementById('name-filter')?.value?.toLowerCase() || '';
     const timeFilterValue = document.getElementById('time-filter')?.value || '';
     const fishFilterValue = document.getElementById('fish-filter')?.value?.toLowerCase() || '';
     const priceFilterValue = document.getElementById('price-filter')?.value || '';
     const reserveFilterValue = document.getElementById('reserve-filter')?.value || '';
+    pesqueirosFiltrados = todosOsPesqueiros.filter(p => (nameFilterValue ? (p.NomePesqueiro?.toLowerCase().includes(nameFilterValue) || p.CidadeUF?.toLowerCase().includes(nameFilterValue)) : true) && (timeFilterValue ? (parseFloat(p.TempoSemTransito) <= parseFloat(timeFilterValue)) : true) && (fishFilterValue ? (p.Peixes?.toLowerCase().includes(fishFilterValue)) : true) && (priceFilterValue ? (parseFloat(p.PrecoMedio) <= parseFloat(priceFilterValue)) : true) && (reserveFilterValue ? (p.AceitaReserva === reserveFilterValue) : true));
+    sortAndRerenderPesqueiros();
+}
 
-    pesqueirosFiltrados = todosOsPesqueiros.filter(p => 
-        (nameFilterValue ? (p.NomePesqueiro?.toLowerCase().includes(nameFilterValue) || p.CidadeUF?.toLowerCase().includes(nameFilterValue)) : true) &&
-        (timeFilterValue ? (parseFloat(p.TempoSemTransito) <= parseFloat(timeFilterValue)) : true) &&
-        (fishFilterValue ? (p.Peixes?.toLowerCase().includes(fishFilterValue)) : true) &&
-        (priceFilterValue ? (parseFloat(p.PrecoMedio) <= parseFloat(priceFilterValue)) : true) &&
-        (reserveFilterValue ? (p.AceitaReserva === reserveFilterValue) : true)
-    );
-    console.log(`DEBUG: applyFilters - ${pesqueirosFiltrados.length} pesqueiros após filtros.`);
-    sortAndRerender(); // Ordena e exibe a página 1
+function sortAndRerenderPesqueiros() {
+    pesqueirosFiltrados.sort((a, b) => {
+        let valA = a[pesqueiroSortColumn];
+        let valB = b[pesqueiroSortColumn];
+        if (valA == null) valA = pesqueiroSortDirection === 'asc' ? Infinity : -Infinity;
+        if (valB == null) valB = pesqueiroSortDirection === 'asc' ? Infinity : -Infinity;
+        const numericColumns = ['TempoSemTransito', 'Distancia', 'PrecoMedio'];
+        if (numericColumns.includes(pesqueiroSortColumn)) {
+            valA = parseFloat(valA) || 0;
+            valB = parseFloat(valB) || 0;
+        }
+        if (valA > valB) return pesqueiroSortDirection === 'asc' ? 1 : -1;
+        if (valA < valB) return pesqueiroSortDirection === 'asc' ? -1 : 1;
+        return 0;
+    });
+    document.querySelectorAll('.sortable-header span').forEach(span => span.textContent = '');
+    const activeHeader = document.querySelector(`.sortable-header[data-sort-by="${pesqueiroSortColumn}"] span`);
+    if (activeHeader) activeHeader.textContent = pesqueiroSortDirection === 'asc' ? ' ▲' : ' ▼';
+    displayPesqueiroPage(1);
     addMarkersToMap(pesqueirosFiltrados, (id, nome) => showDetailsModal(id, nome));
 }
 
-// Função de ordenação
-function sortAndRerender() {
-    console.log(`DEBUG: sortAndRerender - Ordenando por ${sortColumn} ${sortDirection}.`);
-    pesqueirosFiltrados.sort((a, b) => {
-        let valA = a[sortColumn];
-        let valB = b[sortColumn];
 
-        // Trata valores nulos/indefinidos para ordenação
-        if (valA === undefined || valA === null) valA = sortDirection === 'asc' ? Infinity : -Infinity;
-        if (valB === undefined || valB === null) valB = sortDirection === 'asc' ? Infinity : -Infinity;
+// ===================================================================
+//              EVENT LISTENERS
+// ===================================================================
 
-        const numericColumns = ['TempoSemTransito', 'Distancia', 'PrecoMedio'];
-        if (numericColumns.includes(sortColumn)) {
-            valA = parseFloat(valA) || 0; // Converte para número, 0 se falhar
-            valB = parseFloat(valB) || 0;
+function setupEventListeners() {
+    // --- Listeners da Wishlist ---
+    document.getElementById('add-wishlist-item-btn')?.addEventListener('click', () => showWishlistFormModal());
+
+    document.getElementById('wishlist-table-body')?.addEventListener('click', e => {
+        const target = e.target;
+        const row = target.closest('tr');
+        if (!row || !row.dataset.id) return;
+        const id = row.dataset.id;
+        const item = todosOsWishlistItems.find(i => i.ID == id);
+        if (!item) return;
+        if (target.classList.contains('btn-edit-wishlist')) {
+            showWishlistFormModal(item);
+        } else if (target.classList.contains('btn-delete-wishlist')) {
+            showWishlistDeleteConfirmModal(id, item.NomeItem);
+        } else if (target.closest('.item-row')) {
+            showWishlistDetailsModal(item);
         }
-
-        let comparison = 0;
-        if (valA > valB) {
-            comparison = 1;
-        } else if (valA < valB) {
-            comparison = -1;
-        }
-        return sortDirection === 'asc' ? comparison : comparison * -1;
     });
 
-    // Atualiza os indicadores de ordenação na UI
-    document.querySelectorAll('.sortable-header span').forEach(span => span.textContent = '');
-    const activeHeader = document.querySelector(`.sortable-header[data-sort-by="${sortColumn}"] span`);
-    if (activeHeader) {
-        activeHeader.textContent = sortDirection === 'asc' ? ' ▲' : ' ▼';
-    }
-    displayPage(1); // Sempre volta para a primeira página após ordenação/filtro
-}
+    document.getElementById('wishlist-form')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        showLoading();
+        const data = Object.fromEntries(new FormData(e.target).entries());
+        const result = data.ID ? await updateWishlistItem(data) : await createWishlistItem(data);
+        hideLoading();
+        document.getElementById('wishlist-form-modal')?.classList.add('hidden');
+        if(result.status === 'success') {
+            alert('Item da wishlist salvo!');
+            initUI();
+        } else {
+            alert('Erro ao salvar item.');
+        }
+    });
 
-// Configura todos os listeners de eventos da página
-function setupEventListeners() {
-    console.log("DEBUG: setupEventListeners - Configurando listeners de eventos.");
-    document.getElementById('add-pesqueiro-btn')?.addEventListener('click', () => showFormModal());
+    document.getElementById('btn-confirm-delete-wishlist')?.addEventListener('click', async () => {
+        showLoading();
+        const result = await deleteWishlistItem(wishlistItemIdToDelete);
+        hideLoading();
+        document.getElementById('confirm-delete-wishlist-modal')?.classList.add('hidden');
+        if (result.status === 'success') {
+            alert('Item excluído da wishlist!');
+            initUI();
+        } else {
+            alert('Erro ao excluir item.');
+        }
+    });
     
-    // --- NOVO CÓDIGO AQUI ---
-    // Listener para o botão de atalho "Registrar Visita"
+    document.querySelectorAll('#wishlist-details-modal .modal-close-btn, #wishlist-details-modal .modal-bg').forEach(el => el.addEventListener('click', () => document.getElementById('wishlist-details-modal').classList.add('hidden')));
+    document.querySelectorAll('#wishlist-form-modal .modal-close-btn, #wishlist-form-modal .modal-bg').forEach(el => el.addEventListener('click', () => document.getElementById('wishlist-form-modal').classList.add('hidden')));
+    document.getElementById('btn-cancel-delete-wishlist')?.addEventListener('click', () => document.getElementById('confirm-delete-wishlist-modal').classList.add('hidden'));
+
+    // --- Listeners de Pesqueiros ---
+    document.getElementById('add-pesqueiro-btn')?.addEventListener('click', () => showFormModal());
     document.getElementById('btn-shortcut-add-visita')?.addEventListener('click', () => {
-        // Encontra a seção da tabela
         const tableSection = document.getElementById('table-section');
         if (tableSection) {
-            // Rola a página suavemente até a tabela
             tableSection.scrollIntoView({ behavior: 'smooth' });
-            // Pisca a seção para chamar a atenção do usuário
             tableSection.style.transition = 'background-color 0.3s';
-            tableSection.style.backgroundColor = '#e0f2fe'; // Um azul claro
-            setTimeout(() => {
-                tableSection.style.backgroundColor = ''; // Volta ao normal
-            }, 1500);
+            tableSection.style.backgroundColor = '#e0f2fe';
+            setTimeout(() => { tableSection.style.backgroundColor = ''; }, 1500);
         }
     });
-    // --- FIM DO NOVO CÓDIGO ---
 
-    // Listeners dos Filtros
-    ['name-filter', 'price-filter'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.addEventListener('input', applyFilters);
+    ['name-filter', 'price-filter'].forEach(id => document.getElementById(id)?.addEventListener('input', applyFilters));
+    ['reserve-filter', 'time-filter', 'fish-filter'].forEach(id => document.getElementById(id)?.addEventListener('change', applyFilters));
+    document.getElementById('reset-filters')?.addEventListener('click', () => {
+        ['name-filter', 'price-filter', 'reserve-filter', 'time-filter', 'fish-filter'].forEach(id => {
+            const el = document.getElementById(id); if (el) el.value = '';
+        });
+        applyFilters();
     });
-    ['reserve-filter', 'time-filter', 'fish-filter'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.addEventListener('change', applyFilters);
+
+    document.querySelector('#table-section thead')?.addEventListener('click', (e) => {
+        const header = e.target.closest('.sortable-header');
+        if (!header) return;
+        const newSortColumn = header.dataset.sortBy;
+        if (pesqueiroSortColumn === newSortColumn) {
+            pesqueiroSortDirection = pesqueiroSortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            pesqueiroSortColumn = newSortColumn;
+            pesqueiroSortDirection = 'asc';
+        }
+        sortAndRerenderPesqueiros();
     });
-    const resetBtn = document.getElementById('reset-filters');
-    if (resetBtn) {
-        resetBtn.addEventListener('click', () => {
-            ['name-filter', 'price-filter', 'reserve-filter', 'time-filter', 'fish-filter'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.value = '';
-            });
-            applyFilters();
-        });
-    }
 
-    // Listener para ordenação na tabela
-    const tableHead = document.querySelector('#table-section thead');
-    if (tableHead) {
-        tableHead.addEventListener('click', (e) => {
-            const header = e.target.closest('.sortable-header');
-            if (!header) return;
-            const newSortColumn = header.dataset.sortBy;
-            if (sortColumn === newSortColumn) {
-                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
-            } else {
-                sortColumn = newSortColumn;
-                sortDirection = 'asc';
-            }
-            sortAndRerender();
-        });
-    }
+    document.getElementById('pesqueiros-table-body')?.addEventListener('click', e => {
+        const target = e.target;
+        const row = target.closest('tr');
+        if (!row || !row.dataset.id) return;
+        const id = row.dataset.id;
+        const pesqueiro = todosOsPesqueiros.find(p => p.ID == id);
+        if (!pesqueiro) return;
 
-    // Listener para cliques na tabela (abrir detalhes, editar, excluir)
-    const tableBody = document.getElementById('pesqueiros-table-body');
-    if (tableBody) {
-        tableBody.addEventListener('click', e => {
-            const target = e.target;
-            const row = target.closest('tr');
-            if (!row) return;
-            const id = row.getAttribute('data-id');
-            if (!id) return;
-            const pesqueiro = todosOsPesqueiros.find(p => p.ID == id);
-            if (!pesqueiro) return;
-
-            if (target.classList.contains('btn-edit')) {
-                e.stopPropagation(); 
-                showFormModal(id);
-            } else if (target.classList.contains('btn-delete')) {
-                e.stopPropagation(); 
-                showConfirmDeleteModal(id, pesqueiro.NomePesqueiro);
-            } else {
-                showDetailsModal(id, pesqueiro.NomePesqueiro);
-            }
-        });
-    }
+        if (target.classList.contains('btn-edit')) {
+            showFormModal(id);
+        } else if (target.classList.contains('btn-delete')) {
+            showConfirmDeleteModal(id, pesqueiro.NomePesqueiro);
+        } else {
+            showDetailsModal(id, pesqueiro.NomePesqueiro);
+        }
+    });
     
-    // Listeners dos botões dos modais (fechar)
-    document.querySelectorAll('.modal-close-btn').forEach(button => {
-        button.addEventListener('click', () => {
-            document.getElementById('modal')?.classList.add('hidden');
-            document.getElementById('confirm-delete-modal')?.classList.add('hidden');
-        });
-    });
-
-    document.querySelectorAll('.modal-bg').forEach(bg => {
-        bg.addEventListener('click', () => {
-            document.getElementById('modal')?.classList.add('hidden');
-            document.getElementById('confirm-delete-modal')?.classList.add('hidden');
-        });
-    });
-
-    document.getElementById('btn-cancel-delete')?.addEventListener('click', () => {
-        document.getElementById('confirm-delete-modal')?.classList.add('hidden');
-    });
+    document.querySelectorAll('#modal .modal-close-btn, #modal .modal-bg').forEach(el => el.addEventListener('click', () => document.getElementById('modal').classList.add('hidden')));
+    document.getElementById('btn-cancel-delete')?.addEventListener('click', () => document.getElementById('confirm-delete-modal').classList.add('hidden'));
 
     document.getElementById('btn-confirm-delete')?.addEventListener('click', async () => {
         showLoading();
-        console.log(`DEBUG: Excluindo pesqueiro com ID: ${pesqueiroIdToDelete}`);
         const result = await deletePesqueiro(pesqueiroIdToDelete);
         hideLoading();
-        document.getElementById('confirm-delete-modal')?.classList.add('hidden');
-        if (result.status === 'success') {
-            alert('Pesqueiro excluído com sucesso!');
-            initUI(); 
-        } else {
-            alert('Erro ao excluir pesqueiro: ' + (result.message || 'Erro desconhecido.'));
-            console.error("DEBUG: Erro ao excluir pesqueiro:", result);
-        }
+        document.getElementById('confirm-delete-modal').classList.add('hidden');
+        if (result.status === 'success') { alert('Pesqueiro excluído!'); initUI(); } 
+        else { alert('Erro ao excluir pesqueiro.'); }
     });
 
     document.getElementById('pesqueiro-form')?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        showLoading();
-        const formData = new FormData(e.target);
-        const data = Object.fromEntries(formData.entries());
-
-        let result;
-        if (data.ID) {
-            console.log(`DEBUG: Atualizando pesqueiro com ID: ${data.ID}`);
-            result = await updatePesqueiro(data);
-        } else {
-            console.log("DEBUG: Criando novo pesqueiro.");
-            result = await createPesqueiro(data);
-        }
+        e.preventDefault(); showLoading();
+        const data = Object.fromEntries(new FormData(e.target).entries());
+        const result = data.ID ? await updatePesqueiro(data) : await createPesqueiro(data);
         hideLoading();
-        document.getElementById('modal')?.classList.add('hidden');
-        if (result.status === 'success') {
-            alert('Pesqueiro salvo com sucesso!');
-            initUI(); 
-        } else {
-            alert('Erro ao salvar pesqueiro: ' + (result.message || 'Erro desconhecido.'));
-            console.error("DEBUG: Erro ao salvar pesqueiro:", result);
-        }
+        document.getElementById('modal').classList.add('hidden');
+        if (result.status === 'success') { alert('Pesqueiro salvo!'); initUI(); }
+        else { alert('Erro ao salvar pesqueiro.'); }
     });
 
     document.getElementById('visita-form')?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        showLoading();
-        const formData = new FormData(e.target);
-        const data = Object.fromEntries(formData.entries());
-        
+        e.preventDefault(); showLoading();
+        const data = Object.fromEntries(new FormData(e.target).entries());
         data.PesqueiroID = document.getElementById('visita-pesqueiro-id')?.value;
-
-        if (!data.PesqueiroID) {
-            console.error("DEBUG: Tentativa de registrar visita sem PesqueiroID.");
-            alert("Erro: Não foi possível identificar o pesqueiro para registrar a visita.");
-            hideLoading();
-            return;
-        }
-
-        console.log(`DEBUG: Registrando visita para Pesqueiro ID: ${data.PesqueiroID}`);
+        if (!data.PesqueiroID) { alert("Erro: ID do pesqueiro não encontrado."); hideLoading(); return; }
         const result = await createVisita(data);
         hideLoading();
-        document.getElementById('modal')?.classList.add('hidden');
-        if (result.status === 'success') {
-            alert('Visita registrada com sucesso!');
-            const currentPesqueiroIdInModal = document.getElementById('visita-pesqueiro-id')?.value;
-            if (currentPesqueiroIdInModal) {
-                const pesqueiroNome = todosOsPesqueiros.find(p => p.ID == currentPesqueiroIdInModal)?.NomePesqueiro || "Pesqueiro Desconhecido";
-                showDetailsModal(currentPesqueiroIdInModal, pesqueiroNome);
-            }
-            initUI(); 
-        } else {
-            alert('Erro ao registrar visita: ' + (result.message || 'Erro desconhecido.'));
-            console.error("DEBUG: Erro ao registrar visita:", result);
-        }
+        document.getElementById('modal').classList.add('hidden');
+        if (result.status === 'success') { alert('Visita registrada!'); initUI(); }
+        else { alert('Erro ao registrar visita.'); }
     });
 
-    // Configuração das abas do modal de detalhes
     const tabHistorico = document.getElementById('tab-historico');
     const tabRegistrar = document.getElementById('tab-registrar');
     const contentHistorico = document.getElementById('content-historico');
     const contentRegistrar = document.getElementById('content-registrar');
-
-    if (tabHistorico && tabRegistrar && contentHistorico && contentRegistrar) {
-        tabHistorico.addEventListener('click', (e) => {
+    if (tabHistorico && tabRegistrar) {
+        tabHistorico.addEventListener('click', e => {
             e.preventDefault();
-            contentHistorico.classList.remove('hidden');
-            contentRegistrar.classList.add('hidden');
-            tabHistorico.classList.add('border-blue-500', 'text-blue-600');
-            tabHistorico.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
-            tabRegistrar.classList.remove('border-blue-500', 'text-blue-600');
-            tabRegistrar.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+            contentHistorico.classList.remove('hidden'); contentRegistrar.classList.add('hidden');
+            tabHistorico.className = 'border-blue-500 text-blue-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm';
+            tabRegistrar.className = 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm';
         });
-
-        tabRegistrar.addEventListener('click', (e) => {
+        tabRegistrar.addEventListener('click', e => {
             e.preventDefault();
-            contentHistorico.classList.add('hidden');
-            contentRegistrar.classList.remove('hidden');
-            tabRegistrar.classList.add('border-blue-500', 'text-blue-600');
-            tabRegistrar.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
-            tabHistorico.classList.remove('border-blue-500', 'text-blue-600');
-            tabHistorico.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+            contentHistorico.classList.add('hidden'); contentRegistrar.classList.remove('hidden');
+            tabRegistrar.className = 'border-blue-500 text-blue-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm';
+            tabHistorico.className = 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm';
         });
     }
 }
 
-// Função de exemplo para exibir o modal de formulário (adicionar/editar)
+
+// ===================================================================
+//              FUNÇÕES DOS MODAIS DE PESQUEIROS
+// ===================================================================
+
 function showFormModal(id = null) {
-    console.log(`DEBUG: Abrindo modal de formulário (ID: ${id || 'novo'}).`);
     const modal = document.getElementById('modal');
     const formContent = document.getElementById('form-content');
     const detailsContent = document.getElementById('details-content');
     const modalTitle = document.getElementById('modal-title');
     const pesqueiroForm = document.getElementById('pesqueiro-form');
-
-    if (!modal || !formContent || !detailsContent || !modalTitle || !pesqueiroForm) {
-        console.error("DEBUG: showFormModal - Elementos do modal de formulário não encontrados.");
-        return;
-    }
-
+    if (!modal || !formContent || !detailsContent || !modalTitle || !pesqueiroForm) return;
     pesqueiroForm.reset();
     document.getElementById('ID').value = '';
-
     detailsContent.classList.add('hidden');
     formContent.classList.remove('hidden');
-
     if (id) {
         modalTitle.textContent = 'Editar Pesqueiro';
         const pesqueiro = todosOsPesqueiros.find(p => p.ID == id);
         if (pesqueiro) {
             for (const key in pesqueiro) {
-                const input = document.getElementById(key);
-                if (input) {
-                    input.value = pesqueiro[key];
-                }
+                if(form.elements[key]) form.elements[key].value = pesqueiro[key];
             }
-        } else {
-            console.warn(`DEBUG: Pesqueiro com ID ${id} não encontrado para edição.`);
         }
     } else {
         modalTitle.textContent = 'Adicionar Novo Pesqueiro';
@@ -470,9 +488,7 @@ function showFormModal(id = null) {
     modal.classList.remove('hidden');
 }
 
-// Função de exemplo para exibir o modal de detalhes
 async function showDetailsModal(id, nomePesqueiro) {
-    console.log(`DEBUG: Abrindo modal de detalhes para Pesqueiro ID: ${id} (${nomePesqueiro}).`);
     const modal = document.getElementById('modal');
     const formContent = document.getElementById('form-content');
     const detailsContent = document.getElementById('details-content');
@@ -482,127 +498,70 @@ async function showDetailsModal(id, nomePesqueiro) {
     const historicoEmptyState = document.getElementById('historico-empty-state');
     const visitaPesqueiroIdInput = document.getElementById('visita-pesqueiro-id');
     const tabHistorico = document.getElementById('tab-historico');
-
-    if (!modal || !formContent || !detailsContent || !modalTitle || !pesqueiroDetailsContainer || !visitasList || !historicoEmptyState || !visitaPesqueiroIdInput || !tabHistorico) {
-        console.error("DEBUG: showDetailsModal - Um ou mais elementos do modal de detalhes não foram encontrados.");
-        return;
-    }
+    if (!modal || !formContent || !detailsContent || !modalTitle || !pesqueiroDetailsContainer || !visitasList || !historicoEmptyState || !visitaPesqueiroIdInput || !tabHistorico) return;
     
     formContent.classList.add('hidden');
     detailsContent.classList.remove('hidden');
-
     modalTitle.textContent = `Detalhes de ${nomePesqueiro}`;
     
     const pesqueiro = todosOsPesqueiros.find(p => p.ID == id);
     if (pesqueiro) {
-        pesqueiroDetailsContainer.innerHTML = `
-            <h3 class="text-xl font-bold mb-2">${pesqueiro.NomePesqueiro || 'N/A'}</h3>
-            <p><strong>Cidade/UF:</strong> ${pesqueiro.CidadeUF || 'N/A'}</p>
-            <p><strong>Tempo sem Trânsito:</strong> ${pesqueiro.TempoSemTransito || 'N/A'} min</p>
-            <p><strong>Distância:</strong> ${pesqueiro.Distancia || 'N/A'} km</p>
-            <p><strong>Preço Médio:</strong> R$ ${pesqueiro.PrecoMedio || 'N/A'}</p>
-            <p><strong>Aceita Reserva:</strong> ${pesqueiro.AceitaReserva || 'N/A'}</p>
-            <p><strong>Peixes:</strong> ${pesqueiro.Peixes || 'N/A'}</p>
-            <p><strong>Endereço:</strong> ${pesqueiro.EnderecoCompleto || 'N/A'}</p>
-            <p><strong>Coordenadas:</strong> ${pesqueiro.Latitude || 'N/A'}, ${pesqueiro.Longitude || 'N/A'}</p>
-            <p><strong>Telefone/WhatsApp:</strong> ${pesqueiro.Telefone || 'N/A'}</p>
-            <p><strong>Site:</strong> ${pesqueiro.Site ? `<a href="${pesqueiro.Site}" target="_blank" class="text-blue-500 hover:underline">${pesqueiro.Site}</a>` : 'N/A'}</p>
-            <p><strong>Instagram:</strong> ${pesqueiro.Instagram ? `<a href="${pesqueiro.Instagram}" target="_blank" class="text-blue-500 hover:underline">${pesqueiro.Instagram}</a>` : 'N/A'}</p>
-        `;
+        pesqueiroDetailsContainer.innerHTML = `<h3 class="text-xl font-bold mb-2">${pesqueiro.NomePesqueiro || 'N/A'}</h3><p><strong>Cidade/UF:</strong> ${pesqueiro.CidadeUF || 'N/A'}</p><p><strong>Endereço:</strong> ${pesqueiro.EnderecoCompleto || 'N/A'}</p><p><strong>Peixes:</strong> ${pesqueiro.Peixes || 'N/A'}</p>`;
     } else {
-        pesqueiroDetailsContainer.innerHTML = '<p class="text-red-500">Detalhes do pesqueiro não encontrados.</p>';
-        console.warn(`DEBUG: Detalhes para o pesqueiro ID ${id} não encontrados na lista de todosOsPesqueiros.`);
+        pesqueiroDetailsContainer.innerHTML = '<p class="text-red-500">Detalhes não encontrados.</p>';
     }
 
-    visitasList.innerHTML = '<p class="text-gray-500">Carregando histórico de visitas...</p>';
-    historicoEmptyState.classList.add('hidden'); 
-    try {
-        const visitas = await getVisitas(id);
-        console.log(`DEBUG: Visitas para Pesqueiro ID ${id} carregadas:`, visitas);
-        visitasList.innerHTML = ''; 
-        if (visitas && visitas.length > 0) {
-            historicoEmptyState.classList.add('hidden');
-            visitas.forEach(visita => {
-                const visitaDiv = document.createElement('div');
-                visitaDiv.className = 'bg-gray-50 p-3 rounded-lg border border-gray-200';
-                visitaDiv.innerHTML = `
-                    <p class="font-semibold">Data: ${new Date(visita.DataVisita).toLocaleDateString('pt-BR')}</p>
-                    <p>Peixes Capturados: ${visita.PeixesCapturados || 'N/A'}</p>
-                    <p>Observações: ${visita.Observacoes || 'Nenhuma.'}</p>
-                `;
-                visitasList.appendChild(visitaDiv);
-            });
-        } else {
-            historicoEmptyState.classList.remove('hidden');
-            visitasList.innerHTML = ''; 
-        }
-    } catch (error) {
-        console.error("DEBUG: Falha ao carregar visitas:", error);
-        visitasList.innerHTML = '<p class="text-red-500">Erro ao carregar histórico de visitas.</p>';
-        historicoEmptyState.classList.add('hidden');
+    visitasList.innerHTML = '<p class="text-gray-500">Carregando histórico...</p>';
+    historicoEmptyState.classList.add('hidden');
+    const visitas = await getVisitas(id);
+    visitasList.innerHTML = '';
+    if (visitas && visitas.length > 0) {
+        visitas.forEach(visita => {
+            const visitaDiv = document.createElement('div');
+            visitaDiv.className = 'bg-gray-50 p-3 rounded-lg border';
+            visitaDiv.innerHTML = `<p class="font-semibold">Data: ${new Date(visita.DataVisita).toLocaleDateString('pt-BR')}</p><p>Peixes: ${visita.PeixesCapturados || 'N/A'}</p><p>Obs: ${visita.Observacoes || 'Nenhuma.'}</p>`;
+            visitasList.appendChild(visitaDiv);
+        });
+    } else {
+        historicoEmptyState.classList.remove('hidden');
     }
 
     visitaPesqueiroIdInput.value = id;
-
     tabHistorico.click();
-
     modal.classList.remove('hidden');
 }
 
-// Função de exemplo para exibir o modal de confirmação de exclusão
 function showConfirmDeleteModal(id, nome) {
-    console.log(`DEBUG: Abrindo modal de confirmação de exclusão para Pesqueiro ID: ${id} (${nome}).`);
     pesqueiroIdToDelete = id;
     const pesqueiroToDeleteNameEl = document.getElementById('pesqueiro-to-delete-name');
     const confirmDeleteModalEl = document.getElementById('confirm-delete-modal');
-
     if (pesqueiroToDeleteNameEl && confirmDeleteModalEl) {
         pesqueiroToDeleteNameEl.textContent = nome;
         confirmDeleteModalEl.classList.remove('hidden');
-    } else {
-        console.error("DEBUG: showConfirmDeleteModal - Elementos do modal de confirmação não encontrados.");
-        alert(`Confirmar exclusão de ${nome}? (Erro na UI do modal)`);
     }
 }
 
-// Função para renderizar a timeline de visitas
+
+// ===================================================================
+//              FUNÇÕES DE COMPONENTES MENORES
+// ===================================================================
+
 function renderTimeline(visitas) {
-    console.log("DEBUG: renderTimeline - Renderizando timeline de visitas.");
     const timelineContainer = document.getElementById('timeline-container');
-    const timelineLoading = document.getElementById('timeline-loading');
-    
-    if (!timelineContainer) {
-        console.error("DEBUG: renderTimeline - Elemento #timeline-container não encontrado.");
-        return; 
-    }
+    if (!timelineContainer) return;
 
     timelineContainer.innerHTML = ''; 
-    
     if (!visitas || visitas.length === 0) {
-        timelineContainer.innerHTML = '<p class="text-gray-500 p-4 text-center">Nenhuma visita recente para exibir.</p>';
-        if (timelineLoading) timelineLoading.style.display = 'none'; 
+        timelineContainer.innerHTML = '<p class="text-gray-500 p-4 text-center">Nenhuma visita recente.</p>';
         return;
     }
 
     visitas.sort((a, b) => new Date(b.DataVisita) - new Date(a.DataVisita));
-
     const visitasRecentes = visitas.slice(0, 5);
-
     visitasRecentes.forEach(visita => {
         const itemDiv = document.createElement('div');
         itemDiv.className = 'timeline-item';
-        itemDiv.innerHTML = `
-            <div>
-                <p class="text-gray-500 text-xs">${new Date(visita.DataVisita).toLocaleDateString('pt-BR')}</p>
-                <h4 class="font-semibold text-gray-800">${visita.PesqueiroNome || 'Nome Indisponível'}</h4>
-                <p class="text-gray-700 text-sm">${visita.PeixesCapturados ? `Peixes: ${visita.PeixesCapturados}` : ''}</p>
-                <p class="text-gray-600 text-xs">${visita.Observacoes || 'Sem observações.'}</p>
-            </div>
-        `;
+        itemDiv.innerHTML = `<div><p class="text-gray-500 text-xs">${new Date(visita.DataVisita).toLocaleDateString('pt-BR')}</p><h4 class="font-semibold text-gray-800">${visita.PesqueiroNome || 'N/A'}</h4><p class="text-gray-600 text-xs">${visita.Observacoes || 'Sem observações.'}</p></div>`;
         timelineContainer.appendChild(itemDiv);
     });
-
-    if (timelineLoading) {
-        timelineLoading.style.display = 'none'; 
-    }
 }
