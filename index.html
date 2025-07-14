@@ -13,12 +13,9 @@
     <link rel="stylesheet" href="css/styles.css">
 
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
     <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/Leaflet.fullscreen.min.js' defer></script>
-
     <script src='js/lib/index.global.min.js' defer></script>
-    
     <script src="js/api.js" defer></script>
     <script src="js/map.js" defer></script>
     <script src="js/calendar_year_view.js" defer></script>
@@ -40,10 +37,7 @@
                 <a href="wishlist.html" class="bg-white text-blue-600 font-semibold p-2 rounded hover:bg-gray-200 text-sm flex items-center justify-center" aria-label="Minha Wishlist" title="Minha Wishlist">
                     <i class="fa-solid fa-heart text-blue-600 text-lg"></i>
                 </a>
-                <button id="add-pesqueiro-btn" class="bg-white text-blue-600 font-semibold p-2 rounded hover:bg-gray-200 text-sm flex items-center justify-center" aria-label="Adicionar Pesqueiro" title="Adicionar Pesqueiro">
-                    <i class="fa-solid fa-plus text-blue-600 text-lg"></i>
-                </button>
-            </div>
+                </div>
         </div>
     </header>
     <main class="container mx-auto p-4">
@@ -62,7 +56,10 @@
             <div id="map-container" class="bg-white p-3 rounded-lg shadow"><h2 class="text-lg font-semibold mb-3">Mapa de Pesqueiros</h2><div id="map" style="height: 450px;" class="rounded"></div></div>
         </div>
         <section id="table-section" class="bg-white p-3 rounded-lg shadow mb-4">
-            <h2 class="text-lg font-semibold mb-3">Lista de Pesqueiros</h2>
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="text-lg font-semibold">Lista de Pesqueiros</h2>
+                <button id="add-pesqueiro-btn" class="bg-blue-600 text-white font-semibold px-3 py-1.5 rounded hover:bg-blue-700 text-sm">+ Adicionar Pesqueiro</button>
+            </div>
             <div id="table-container" class="overflow-x-auto">
                 <table class="w-full text-sm text-left">
                     <thead class="bg-gray-100 text-xs uppercase">
@@ -91,7 +88,10 @@
                 </div>
             </section>
             <section id="year-calendar-section" class="bg-white p-3 rounded-lg shadow">
-                <h2 class="text-lg font-semibold mb-3">Visão Anual das Visitas</h2>
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-lg font-semibold">Visão Anual das Visitas</h2>
+                    <button id="btn-shortcut-add-visita" class="bg-blue-600 text-white font-semibold px-3 py-1.5 rounded hover:bg-blue-700 text-sm">+ Registrar Visita</button>
+                </div>
                 <div id="year-calendar">
                     <p id="year-calendar-loading" class="text-gray-500 text-center">Carregando calendário anual...</p>
                 </div>
@@ -165,7 +165,6 @@
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Garante que todo o HTML foi carregado e os scripts 'defer' executados antes de iniciar
             initMap('map');
             initUI();
         });

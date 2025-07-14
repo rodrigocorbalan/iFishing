@@ -19,14 +19,10 @@ function hideLoading() {
     if (loaderEl) {
         loaderEl.classList.add('hidden');
         console.log("DEBUG: hideLoading - Classe 'hidden' adicionada ao loader.");
-        // Opcional: Para ter certeza absoluta que o estilo está sendo aplicado
-        // console.log("DEBUG: hideLoading - Estilo display do loader:", window.getComputedStyle(loaderEl).display);
     } else {
         console.error("DEBUG: hideLoading - Elemento #loader não encontrado!");
     }
 }
-
-// Cole esta função no lugar da sua função initUI() existente em js/ui.js
 
 // Função principal que inicializa a UI com os logs para debug
 async function initUI() {
@@ -46,11 +42,8 @@ async function initUI() {
         
         populateFishFilter(todosOsPesqueiros);
         
-        // --- ALTERAÇÕES AQUI ---
-        // Agora, o initUI controla a renderização da timeline e do calendário anual
-        renderTimeline(visitas); // Renderiza a timeline com os dados das visitas
-        initYearCalendar(visitas); // Renderiza o calendário anual com os MESMOS dados
-        // --- FIM DAS ALTERAÇÕES ---
+        renderTimeline(visitas);
+        initYearCalendar(visitas);
 
         setupEventListeners();
         console.log("5. initUI: Restante da UI foi configurado e event listeners ativados.");
@@ -238,6 +231,24 @@ function setupEventListeners() {
     console.log("DEBUG: setupEventListeners - Configurando listeners de eventos.");
     document.getElementById('add-pesqueiro-btn')?.addEventListener('click', () => showFormModal());
     
+    // --- NOVO CÓDIGO AQUI ---
+    // Listener para o botão de atalho "Registrar Visita"
+    document.getElementById('btn-shortcut-add-visita')?.addEventListener('click', () => {
+        // Encontra a seção da tabela
+        const tableSection = document.getElementById('table-section');
+        if (tableSection) {
+            // Rola a página suavemente até a tabela
+            tableSection.scrollIntoView({ behavior: 'smooth' });
+            // Pisca a seção para chamar a atenção do usuário
+            tableSection.style.transition = 'background-color 0.3s';
+            tableSection.style.backgroundColor = '#e0f2fe'; // Um azul claro
+            setTimeout(() => {
+                tableSection.style.backgroundColor = ''; // Volta ao normal
+            }, 1500);
+        }
+    });
+    // --- FIM DO NOVO CÓDIGO ---
+
     // Listeners dos Filtros
     ['name-filter', 'price-filter'].forEach(id => {
         const el = document.getElementById(id);
@@ -288,10 +299,10 @@ function setupEventListeners() {
             if (!pesqueiro) return;
 
             if (target.classList.contains('btn-edit')) {
-                e.stopPropagation(); // Impede que o clique na linha também ative o modal de detalhes
+                e.stopPropagation(); 
                 showFormModal(id);
             } else if (target.classList.contains('btn-delete')) {
-                e.stopPropagation(); // Impede que o clique na linha também ative o modal de detalhes
+                e.stopPropagation(); 
                 showConfirmDeleteModal(id, pesqueiro.NomePesqueiro);
             } else {
                 showDetailsModal(id, pesqueiro.NomePesqueiro);
@@ -326,7 +337,7 @@ function setupEventListeners() {
         document.getElementById('confirm-delete-modal')?.classList.add('hidden');
         if (result.status === 'success') {
             alert('Pesqueiro excluído com sucesso!');
-            initUI(); // Recarrega a UI após a exclusão
+            initUI(); 
         } else {
             alert('Erro ao excluir pesqueiro: ' + (result.message || 'Erro desconhecido.'));
             console.error("DEBUG: Erro ao excluir pesqueiro:", result);
@@ -351,7 +362,7 @@ function setupEventListeners() {
         document.getElementById('modal')?.classList.add('hidden');
         if (result.status === 'success') {
             alert('Pesqueiro salvo com sucesso!');
-            initUI(); // Recarrega a UI após salvar
+            initUI(); 
         } else {
             alert('Erro ao salvar pesqueiro: ' + (result.message || 'Erro desconhecido.'));
             console.error("DEBUG: Erro ao salvar pesqueiro:", result);
@@ -364,7 +375,6 @@ function setupEventListeners() {
         const formData = new FormData(e.target);
         const data = Object.fromEntries(formData.entries());
         
-        // Garante que o ID do pesqueiro esteja presente nos dados da visita
         data.PesqueiroID = document.getElementById('visita-pesqueiro-id')?.value;
 
         if (!data.PesqueiroID) {
@@ -380,15 +390,12 @@ function setupEventListeners() {
         document.getElementById('modal')?.classList.add('hidden');
         if (result.status === 'success') {
             alert('Visita registrada com sucesso!');
-            // Após registrar, queremos atualizar o histórico e a timeline
-            // Se o modal de detalhes estiver aberto, recarregamos as visitas dele
             const currentPesqueiroIdInModal = document.getElementById('visita-pesqueiro-id')?.value;
             if (currentPesqueiroIdInModal) {
-                 // Reabre o modal de detalhes para atualizar o histórico
                 const pesqueiroNome = todosOsPesqueiros.find(p => p.ID == currentPesqueiroIdInModal)?.NomePesqueiro || "Pesqueiro Desconhecido";
                 showDetailsModal(currentPesqueiroIdInModal, pesqueiroNome);
             }
-            initUI(); // Recarrega a UI (para atualizar a timeline na página principal)
+            initUI(); 
         } else {
             alert('Erro ao registrar visita: ' + (result.message || 'Erro desconhecido.'));
             console.error("DEBUG: Erro ao registrar visita:", result);
@@ -438,11 +445,9 @@ function showFormModal(id = null) {
         return;
     }
 
-    // Limpa o formulário
     pesqueiroForm.reset();
     document.getElementById('ID').value = '';
 
-    // Esconde detalhes e mostra o formulário
     detailsContent.classList.add('hidden');
     formContent.classList.remove('hidden');
 
@@ -450,7 +455,6 @@ function showFormModal(id = null) {
         modalTitle.textContent = 'Editar Pesqueiro';
         const pesqueiro = todosOsPesqueiros.find(p => p.ID == id);
         if (pesqueiro) {
-            // Preenche o formulário com os dados do pesqueiro
             for (const key in pesqueiro) {
                 const input = document.getElementById(key);
                 if (input) {
@@ -484,13 +488,11 @@ async function showDetailsModal(id, nomePesqueiro) {
         return;
     }
     
-    // Esconde o formulário e mostra detalhes
     formContent.classList.add('hidden');
     detailsContent.classList.remove('hidden');
 
     modalTitle.textContent = `Detalhes de ${nomePesqueiro}`;
     
-    // Encontrar o pesqueiro pelos detalhes
     const pesqueiro = todosOsPesqueiros.find(p => p.ID == id);
     if (pesqueiro) {
         pesqueiroDetailsContainer.innerHTML = `
@@ -512,13 +514,12 @@ async function showDetailsModal(id, nomePesqueiro) {
         console.warn(`DEBUG: Detalhes para o pesqueiro ID ${id} não encontrados na lista de todosOsPesqueiros.`);
     }
 
-    // Carregar e renderizar histórico de visitas
     visitasList.innerHTML = '<p class="text-gray-500">Carregando histórico de visitas...</p>';
-    historicoEmptyState.classList.add('hidden'); // Esconde o estado vazio enquanto carrega
+    historicoEmptyState.classList.add('hidden'); 
     try {
         const visitas = await getVisitas(id);
         console.log(`DEBUG: Visitas para Pesqueiro ID ${id} carregadas:`, visitas);
-        visitasList.innerHTML = ''; // Limpa o "carregando"
+        visitasList.innerHTML = ''; 
         if (visitas && visitas.length > 0) {
             historicoEmptyState.classList.add('hidden');
             visitas.forEach(visita => {
@@ -533,7 +534,7 @@ async function showDetailsModal(id, nomePesqueiro) {
             });
         } else {
             historicoEmptyState.classList.remove('hidden');
-            visitasList.innerHTML = ''; // Garante que a lista está vazia
+            visitasList.innerHTML = ''; 
         }
     } catch (error) {
         console.error("DEBUG: Falha ao carregar visitas:", error);
@@ -541,11 +542,9 @@ async function showDetailsModal(id, nomePesqueiro) {
         historicoEmptyState.classList.add('hidden');
     }
 
-    // Preenche o ID do pesqueiro para o formulário de nova visita
     visitaPesqueiroIdInput.value = id;
 
-    // Garante que a aba "Histórico" é a inicial
-    tabHistorico.click(); // Simula um clique para ativar a aba correta
+    tabHistorico.click();
 
     modal.classList.remove('hidden');
 }
@@ -577,18 +576,16 @@ function renderTimeline(visitas) {
         return; 
     }
 
-    timelineContainer.innerHTML = ''; // Limpa o conteúdo existente
+    timelineContainer.innerHTML = ''; 
     
     if (!visitas || visitas.length === 0) {
         timelineContainer.innerHTML = '<p class="text-gray-500 p-4 text-center">Nenhuma visita recente para exibir.</p>';
-        if (timelineLoading) timelineLoading.style.display = 'none'; // Esconde o "Carregando"
+        if (timelineLoading) timelineLoading.style.display = 'none'; 
         return;
     }
 
-    // Ordena as visitas por data (mais recente primeiro)
     visitas.sort((a, b) => new Date(b.DataVisita) - new Date(a.DataVisita));
 
-    // Exibe apenas as 5 visitas mais recentes para a timeline na página principal
     const visitasRecentes = visitas.slice(0, 5);
 
     visitasRecentes.forEach(visita => {
@@ -606,6 +603,6 @@ function renderTimeline(visitas) {
     });
 
     if (timelineLoading) {
-        timelineLoading.style.display = 'none'; // Esconde o "Carregando"
+        timelineLoading.style.display = 'none'; 
     }
 }

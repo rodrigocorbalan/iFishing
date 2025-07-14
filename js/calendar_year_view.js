@@ -2,11 +2,10 @@
 
 /**
  * Inicializa o FullCalendar na div #year-calendar com os eventos fornecidos.
- * Esta versão é mais robusta, adiando a renderização para evitar race conditions.
  * @param {Array} visitas - Um array de objetos de visita, já carregado da API.
  */
 function initYearCalendar(visitas) {
-    console.log("--- INICIANDO CALENDÁRIO ANUAL (VERSÃO ROBUSTA) ---");
+    console.log("--- INICIANDO CALENDÁRIO ANUAL (VERSÃO MENSAL) ---");
     const calendarEl = document.getElementById('year-calendar');
     const loaderEl = document.getElementById('year-calendar-loading');
 
@@ -21,18 +20,20 @@ function initYearCalendar(visitas) {
     loaderEl.classList.add('hidden');
     calendarEl.style.visibility = 'visible';
 
-    // Adia a renderização para o próximo ciclo de eventos da engine do JS.
-    // Isso garante que o DOM esteja 'pronto' para receber o calendário.
     setTimeout(() => {
         try {
             const calendar = new FullCalendar.Calendar(calendarEl, {
                 locale: 'pt-br',
-                initialView: 'dayGridMonth',
+
+                // --- VOLTANDO PARA A VISÃO MENSAL ---
+                initialView: 'dayGridMonth', // Voltamos para a visão de um mês.
                 headerToolbar: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'dayGridMonth,listYear'
+                    left: 'prev,next today', // Botões para navegar entre meses.
+                    center: 'title',         // Mostra o mês e ano atuais.
+                    right: 'dayGridMonth,listYear' // Opções de visualização.
                 },
+                // --- FIM DA ALTERAÇÃO ---
+
                 events: events,
                 eventClick: function(info) {
                     const detalhes = `Pesqueiro: ${info.event.title}\n` +
@@ -50,17 +51,15 @@ function initYearCalendar(visitas) {
             console.log("--- CALENDÁRIO ANUAL RENDERIZADO COM SUCESSO ---");
 
         } catch (e) {
-            // Se um erro ocorrer aqui, ele será capturado e logado de forma específica.
             console.error("ERRO CRÍTICO AO RENDERIZAR O FULLCALENDAR:", e);
-            loaderEl.classList.remove('hidden'); // Mostra o loader novamente
+            loaderEl.classList.remove('hidden');
             loaderEl.textContent = `Erro ao renderizar o calendário: ${e.message}`;
         }
-    }, 0); // O timeout de 0ms é o suficiente para adiar a execução.
+    }, 0); 
 }
 
 /**
  * Formata os dados das visitas para o formato que o FullCalendar entende.
- * (Esta função permanece a mesma)
  * @param {Array} visitas - O array de objetos de visita.
  * @returns {Array} Um array de eventos para o FullCalendar.
  */
