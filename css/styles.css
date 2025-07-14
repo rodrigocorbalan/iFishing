@@ -176,3 +176,26 @@ body {
 #loader.hidden {
     display: none; /* Remova o !important */
 }
+
+/* Estilos para o Calendário Anual */
+#year-calendar {
+    max-width: 100%; /* Garante que ocupe o espaço disponível */
+    margin: 0 auto;
+    font-size: 0.8em; /* Ajusta o tamanho da fonte para caber mais */
+}
+
+/* Ajustes para células do dia para caber mais meses */
+.fc-daygrid-body-unbuffered {
+    /* Permite que as células sejam menores sem overflow */
+    overflow: visible;
+}
+
+/* Alguns ajustes visuais para os eventos */
+.fc-event {
+    font-size: 0.7em;
+    padding: 1px 3px;
+    line-height: 1.2;
+}
+.fc-event-title-container {
+    white-space: normal; /* Permite que o título quebre linha */
+}
