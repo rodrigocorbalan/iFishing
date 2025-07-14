@@ -199,3 +199,11 @@ body {
 .fc-event-title-container {
     white-space: normal; /* Permite que o título quebre linha */
 }
+
+/* styles.css */
+/* ... seus estilos existentes ... */
+
+#year-calendar {
+    min-height: 300px; /* Garante uma altura mínima para o calendário */
+    /* Mantenha outros estilos como max-width: 100%; margin: 0 auto; font-size: 0.8em; */
+}

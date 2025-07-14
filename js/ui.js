@@ -26,6 +26,8 @@ function hideLoading() {
     }
 }
 
+// Cole esta função no lugar da sua função initUI() existente em js/ui.js
+
 // Função principal que inicializa a UI com os logs para debug
 async function initUI() {
     console.log("--- INICIANDO DEBUG UI ---");
@@ -34,27 +36,30 @@ async function initUI() {
     try {
         // Usa Promise.all para buscar ambos os conjuntos de dados em paralelo
         const [pesqueiros, visitas] = await Promise.all([getPesqueiros(), getAllVisitas()]);
-        console.log("2. initUI: Dados da API recebidos com sucesso.");
+        console.log("2. initUI: Dados da API (Pesqueiros e Visitas) recebidos com sucesso.");
         
         todosOsPesqueiros = pesqueiros;
         pesqueirosFiltrados = [...todosOsPesqueiros]; // Inicializa filtrados com todos
         
         console.log("3. initUI: Chamando a função sortAndRerender para ordenar e exibir a tabela.");
         sortAndRerender(); // Ordena e renderiza a tabela (e chama displayPage(1))
-        console.log("4. initUI: A função sortAndRerender foi CONCLUÍDA.");
         
         populateFishFilter(todosOsPesqueiros);
-        renderTimeline(visitas);
+        
+        // --- ALTERAÇÕES AQUI ---
+        // Agora, o initUI controla a renderização da timeline e do calendário anual
+        renderTimeline(visitas); // Renderiza a timeline com os dados das visitas
+        initYearCalendar(visitas); // Renderiza o calendário anual com os MESMOS dados
+        // --- FIM DAS ALTERAÇÕES ---
+
         setupEventListeners();
         console.log("5. initUI: Restante da UI foi configurado e event listeners ativados.");
 
-        // Adicione este setTimeout para fins de debug, para dar um tempo antes de esconder o loader
-        // Isso ajuda a visualizar se o loader aparece e depois desaparece.
         setTimeout(() => {
             console.log("6. initUI: Timeout concluído. Escondendo o loader.");
             hideLoading();
             console.log("--- FIM DO DEBUG UI ---");
-        }, 500); // Atraso de 0.5 segundos para o loader desaparecer (ajuste se necessário)
+        }, 500);
 
     } catch (error) {
         console.error("ERRO FATAL NA INICIALIZAÇÃO DA UI:", error);
