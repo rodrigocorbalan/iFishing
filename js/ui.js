@@ -49,6 +49,7 @@ async function initUI() {
         // Processa Componentes Visuais
         renderTimeline(visitas);
         initYearCalendar(visitas);
+        setupThemeToggle();
         
         setupEventListeners();
         hideLoading();
@@ -80,22 +81,22 @@ function renderWishlistTable() {
     const paginatedItems = todosOsWishlistItems.slice(startIndex, endIndex);
 
     if (paginatedItems.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="4" class="text-center p-4">Nenhum item na sua wishlist.</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="4" class="text-center p-4 text-gray-500 dark:text-gray-400">Nenhum item na sua wishlist.</td></tr>';
         return;
     }
 
     paginatedItems.forEach(item => {
         const tr = document.createElement('tr');
-        tr.className = 'hover:bg-gray-100 cursor-pointer item-row';
+        tr.className = 'hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer item-row';
         tr.setAttribute('data-id', item.ID);
         tr.innerHTML = `
-            <td class="p-2 border-t">${item.NomeItem || 'N/A'}</td>
-            <td class="p-2 border-t">R$ ${item.PrecoEstimado ? parseFloat(item.PrecoEstimado).toFixed(2) : 'N/A'}</td>
-            <td class="p-2 border-t">${item.Status || 'N/A'}</td>
-            <td class="p-2 border-t text-right">
+            <td class="p-2 border-t border-gray-200 dark:border-gray-700">${item.NomeItem || 'N/A'}</td>
+            <td class="p-2 border-t border-gray-200 dark:border-gray-700">R$ ${item.PrecoEstimado ? parseFloat(item.PrecoEstimado).toFixed(2) : 'N/A'}</td>
+            <td class="p-2 border-t border-gray-200 dark:border-gray-700">${item.Status || 'N/A'}</td>
+            <td class="p-2 border-t border-gray-200 dark:border-gray-700 text-right">
                 <div class="flex gap-2 justify-end">
-                    <button class="btn-edit-wishlist text-xs bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded">Editar</button>
-                    <button class="btn-delete-wishlist text-xs bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">Remover</button>
+                    <button class="btn-edit-wishlist text-xs bg-sky-500 hover:bg-sky-600 dark:bg-sky-700 dark:hover:bg-sky-600 text-white font-bold py-1 px-2 rounded">Editar</button>
+                    <button class="btn-delete-wishlist text-xs bg-rose-500 hover:bg-rose-600 dark:bg-rose-700 dark:hover:bg-rose-600 text-white font-bold py-1 px-2 rounded">Remover</button>
                 </div>
             </td>
         `;
@@ -114,7 +115,7 @@ function renderWishlistPagination() {
     const createButton = (text, page, isDisabled = false, isCurrent = false) => {
         const button = document.createElement('button');
         button.textContent = text;
-        button.className = `pagination-btn px-3 py-1 rounded-md text-sm ${isCurrent ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'} ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`;
+        button.className = `pagination-btn px-3 py-1 rounded-md text-sm ${isCurrent ? 'bg-teal-600 text-white' : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-500'} ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`;
         button.disabled = isDisabled;
         button.addEventListener('click', () => displayWishlistPage(page));
         return button;
@@ -141,11 +142,11 @@ function showWishlistDetailsModal(item) {
             <p><strong>Marca/Modelo:</strong> ${item.MarcaModelo || 'N/A'}</p>
             <p><strong>Especificações:</strong> ${item.Especificacoes || 'N/A'}</p>
             <p><strong>Preço Estimado:</strong> R$ ${item.PrecoEstimado ? parseFloat(item.PrecoEstimado).toFixed(2) : 'N/A'}</p>
-            <p><strong>Link:</strong> ${item.LinkCompra ? `<a href="${item.LinkCompra}" target="_blank" class="text-blue-500 hover:underline">Abrir Link</a>` : 'N/A'}</p>
+            <p><strong>Link:</strong> ${item.LinkCompra ? `<a href="${item.LinkCompra}" target="_blank" class="text-teal-400 hover:underline">Abrir Link</a>` : 'N/A'}</p>
             <p><strong>Prioridade:</strong> ${item.Prioridade || 'N/A'}</p>
             <p><strong>Status:</strong> ${item.Status || 'N/A'}</p>
             <p class="mt-4"><strong>Notas:</strong></p>
-            <p class="whitespace-pre-wrap bg-gray-50 p-2 rounded border">${item.NotasPessoais || 'Nenhuma.'}</p>
+            <p class="whitespace-pre-wrap bg-gray-50 dark:bg-gray-700 p-2 rounded border border-gray-200 dark:border-gray-600">${item.NotasPessoais || 'Nenhuma.'}</p>
         </div>
     `;
     modal.classList.remove('hidden');
@@ -162,7 +163,6 @@ function showWishlistFormModal(itemData = null) {
 
     if (itemData) {
         title.textContent = 'Editar Item da Wishlist';
-        // Preenche o formulário com os dados do item
         for (const key in itemData) {
             if (form.elements[key]) {
                 form.elements[key].value = itemData[key];
@@ -209,17 +209,22 @@ function renderPesqueiroTable() {
     }
     paginatedItems.forEach((p, index) => {
         const tr = document.createElement('tr');
-        tr.className = 'hover:bg-gray-100 cursor-pointer';
+        tr.className = 'hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer';
         tr.setAttribute('data-id', p.ID);
         tr.innerHTML = `
-            <td class="p-1.5 border-t text-center font-medium">${startIndex + index + 1}</td>
-            <td class="p-1.5 border-t">${p.NomePesqueiro}</td>
-            <td class="p-1.5 border-t">${p.CidadeUF}</td>
-            <td class="p-1.5 border-t">${p.TempoSemTransito || 'N/A'} min</td>
-            <td class="p-1.5 border-t">${p.Distancia || 'N/A'} km</td>
-            <td class="p-1.5 border-t">R$ ${p.PrecoMedio || 'N/A'}</td>
-            <td class="p-1.5 border-t">${p.AceitaReserva || 'N/A'}</td>
-            <td class="p-1.5 border-t"><div class="flex gap-2"><button class="btn-edit text-xs bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded">Editar</button><button class="btn-delete text-xs bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">Excluir</button></div></td>
+            <td class="p-1.5 border-t border-gray-200 dark:border-gray-700 text-center font-medium">${startIndex + index + 1}</td>
+            <td class="p-1.5 border-t border-gray-200 dark:border-gray-700">${p.NomePesqueiro}</td>
+            <td class="p-1.5 border-t border-gray-200 dark:border-gray-700">${p.CidadeUF}</td>
+            <td class="p-1.5 border-t border-gray-200 dark:border-gray-700">${p.TempoSemTransito || 'N/A'} min</td>
+            <td class="p-1.5 border-t border-gray-200 dark:border-gray-700">${p.Distancia || 'N/A'} km</td>
+            <td class="p-1.5 border-t border-gray-200 dark:border-gray-700">R$ ${p.PrecoMedio || 'N/A'}</td>
+            <td class="p-1.5 border-t border-gray-200 dark:border-gray-700">${p.AceitaReserva || 'N/A'}</td>
+            <td class="p-1.5 border-t border-gray-200 dark:border-gray-700 text-right">
+                <div class="flex gap-2 justify-end">
+                    <button class="btn-edit text-xs bg-sky-500 hover:bg-sky-600 dark:bg-sky-700 dark:hover:bg-sky-600 text-white font-bold py-1 px-2 rounded">Editar</button>
+                    <button class="btn-delete text-xs bg-rose-500 hover:bg-rose-600 dark:bg-rose-700 dark:hover:bg-rose-600 text-white font-bold py-1 px-2 rounded">Excluir</button>
+                </div>
+            </td>
         `;
         tableBody.appendChild(tr);
     });
@@ -235,7 +240,7 @@ function renderPesqueiroPagination() {
     const createButton = (text, page, isDisabled = false, isCurrent = false) => {
         const button = document.createElement('button');
         button.textContent = text;
-        button.className = `pagination-btn px-3 py-1 rounded-md text-sm ${isCurrent ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'} ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`;
+        button.className = `pagination-btn px-3 py-1 rounded-md text-sm ${isCurrent ? 'bg-teal-600 text-white' : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-500'} ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`;
         button.disabled = isDisabled;
         button.addEventListener('click', () => displayPesqueiroPage(page));
         return button;
@@ -446,13 +451,13 @@ function setupEventListeners() {
         tabHistorico.addEventListener('click', e => {
             e.preventDefault();
             contentHistorico.classList.remove('hidden'); contentRegistrar.classList.add('hidden');
-            tabHistorico.className = 'border-blue-500 text-blue-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm';
+            tabHistorico.className = 'border-teal-500 text-teal-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm';
             tabRegistrar.className = 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm';
         });
         tabRegistrar.addEventListener('click', e => {
             e.preventDefault();
             contentHistorico.classList.add('hidden'); contentRegistrar.classList.remove('hidden');
-            tabRegistrar.className = 'border-blue-500 text-blue-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm';
+            tabRegistrar.className = 'border-teal-500 text-teal-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm';
             tabHistorico.className = 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm';
         });
     }
@@ -470,16 +475,20 @@ function showFormModal(id = null) {
     const modalTitle = document.getElementById('modal-title');
     const pesqueiroForm = document.getElementById('pesqueiro-form');
     if (!modal || !formContent || !detailsContent || !modalTitle || !pesqueiroForm) return;
+    
     pesqueiroForm.reset();
     document.getElementById('ID').value = '';
     detailsContent.classList.add('hidden');
     formContent.classList.remove('hidden');
+
     if (id) {
         modalTitle.textContent = 'Editar Pesqueiro';
         const pesqueiro = todosOsPesqueiros.find(p => p.ID == id);
         if (pesqueiro) {
             for (const key in pesqueiro) {
-                if(form.elements[key]) form.elements[key].value = pesqueiro[key];
+                if (pesqueiroForm.elements[key]) {
+                    pesqueiroForm.elements[key].value = pesqueiro[key];
+                }
             }
         }
     } else {
@@ -506,19 +515,19 @@ async function showDetailsModal(id, nomePesqueiro) {
     
     const pesqueiro = todosOsPesqueiros.find(p => p.ID == id);
     if (pesqueiro) {
-        pesqueiroDetailsContainer.innerHTML = `<h3 class="text-xl font-bold mb-2">${pesqueiro.NomePesqueiro || 'N/A'}</h3><p><strong>Cidade/UF:</strong> ${pesqueiro.CidadeUF || 'N/A'}</p><p><strong>Endereço:</strong> ${pesqueiro.EnderecoCompleto || 'N/A'}</p><p><strong>Peixes:</strong> ${pesqueiro.Peixes || 'N/A'}</p>`;
+        pesqueiroDetailsContainer.innerHTML = `<h3 class="text-xl font-bold mb-2">${pesqueiro.NomePesqueiro || 'N/A'}</h3><p><strong>Cidade/UF:</strong> ${pesqueiro.CidadeUF || 'N/A'}</p><p><strong>Endereço:</strong> ${pesqueiro.EnderecoCompleto || 'N/A'}</p><p><strong>Peixes:</strong> ${pesqueiro.Peixes || 'N/A'}</p><p><strong>Telefone:</strong> ${pesqueiro.Telefone || 'N/A'}</p>`;
     } else {
         pesqueiroDetailsContainer.innerHTML = '<p class="text-red-500">Detalhes não encontrados.</p>';
     }
 
-    visitasList.innerHTML = '<p class="text-gray-500">Carregando histórico...</p>';
+    visitasList.innerHTML = '<p class="text-gray-500 dark:text-gray-400">Carregando histórico...</p>';
     historicoEmptyState.classList.add('hidden');
     const visitas = await getVisitas(id);
     visitasList.innerHTML = '';
     if (visitas && visitas.length > 0) {
         visitas.forEach(visita => {
             const visitaDiv = document.createElement('div');
-            visitaDiv.className = 'bg-gray-50 p-3 rounded-lg border';
+            visitaDiv.className = 'bg-gray-50 dark:bg-gray-700 p-3 rounded-lg border border-gray-200 dark:border-gray-600';
             visitaDiv.innerHTML = `<p class="font-semibold">Data: ${new Date(visita.DataVisita).toLocaleDateString('pt-BR')}</p><p>Peixes: ${visita.PeixesCapturados || 'N/A'}</p><p>Obs: ${visita.Observacoes || 'Nenhuma.'}</p>`;
             visitasList.appendChild(visitaDiv);
         });
@@ -545,6 +554,36 @@ function showConfirmDeleteModal(id, nome) {
 // ===================================================================
 //              FUNÇÕES DE COMPONENTES MENORES
 // ===================================================================
+function setupThemeToggle() {
+    const themeToggleBtn = document.getElementById('theme-toggle-btn');
+    if(!themeToggleBtn) return;
+
+    const moonIcon = themeToggleBtn.querySelector('.fa-moon');
+    const sunIcon = themeToggleBtn.querySelector('.fa-sun');
+    const htmlEl = document.documentElement;
+
+    const applyTheme = (theme) => {
+        if (theme === 'dark') {
+            htmlEl.classList.add('dark');
+            moonIcon?.classList.add('hidden');
+            sunIcon?.classList.remove('hidden');
+            localStorage.setItem('theme', 'dark');
+        } else {
+            htmlEl.classList.remove('dark');
+            moonIcon?.classList.remove('hidden');
+            sunIcon?.classList.add('hidden');
+            localStorage.setItem('theme', 'light');
+        }
+    };
+
+    const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    applyTheme(savedTheme);
+
+    themeToggleBtn.addEventListener('click', () => {
+        const newTheme = htmlEl.classList.contains('dark') ? 'light' : 'dark';
+        applyTheme(newTheme);
+    });
+}
 
 function renderTimeline(visitas) {
     const timelineContainer = document.getElementById('timeline-container');
@@ -552,7 +591,7 @@ function renderTimeline(visitas) {
 
     timelineContainer.innerHTML = ''; 
     if (!visitas || visitas.length === 0) {
-        timelineContainer.innerHTML = '<p class="text-gray-500 p-4 text-center">Nenhuma visita recente.</p>';
+        timelineContainer.innerHTML = '<p class="text-gray-500 dark:text-gray-400 p-4 text-center">Nenhuma visita recente.</p>';
         return;
     }
 
@@ -561,7 +600,7 @@ function renderTimeline(visitas) {
     visitasRecentes.forEach(visita => {
         const itemDiv = document.createElement('div');
         itemDiv.className = 'timeline-item';
-        itemDiv.innerHTML = `<div><p class="text-gray-500 text-xs">${new Date(visita.DataVisita).toLocaleDateString('pt-BR')}</p><h4 class="font-semibold text-gray-800">${visita.PesqueiroNome || 'N/A'}</h4><p class="text-gray-600 text-xs">${visita.Observacoes || 'Sem observações.'}</p></div>`;
+        itemDiv.innerHTML = `<div><p class="text-gray-500 dark:text-gray-400 text-xs">${new Date(visita.DataVisita).toLocaleDateString('pt-BR')}</p><h4 class="font-semibold">${visita.PesqueiroNome || 'N/A'}</h4><p class="text-xs">${visita.Observacoes || 'Sem observações.'}</p></div>`;
         timelineContainer.appendChild(itemDiv);
     });
 }
