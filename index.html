@@ -13,13 +13,6 @@
     <link rel="stylesheet" href="css/styles.css">
 
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
-    <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/Leaflet.fullscreen.min.js' defer></script>
-    <script src='js/lib/index.global.min.js' defer></script>
-    <script src="js/api.js" defer></script>
-    <script src="js/map.js" defer></script>
-    <script src="js/calendar_year_view.js" defer></script>
-    <script src="js/ui.js" defer></script>
 </head>
 
 <body class="bg-gray-900 text-gray-200">
@@ -28,6 +21,18 @@
         <div class="container mx-auto flex justify-between items-center">
             <div class="flex items-center">
                 <img src="img/fishing.png" alt="iFishing Logo" class="h-8">
+                <h1 class="text-xl font-bold ml-2">iFishing</h1>
+            </div>
+            <div class="flex items-center space-x-2">
+                <a href="calendario.html" class="bg-white text-blue-600 font-semibold p-2 rounded hover:bg-gray-200 text-sm flex items-center justify-center" aria-label="Ver Calendário" title="Ver Calendário">
+                    <i class="fa-solid fa-calendar-days text-blue-600 text-lg"></i>
+                </a>
+                <a href="wishlist.html" class="bg-white text-blue-600 font-semibold p-2 rounded hover:bg-gray-200 text-sm flex items-center justify-center" aria-label="Minha Wishlist" title="Minha Wishlist">
+                    <i class="fa-solid fa-heart text-blue-600 text-lg"></i>
+                </a>
+                <button id="add-pesqueiro-btn" class="bg-white text-blue-600 font-semibold p-2 rounded hover:bg-gray-200 text-sm flex items-center justify-center" aria-label="Adicionar Pesqueiro" title="Adicionar Pesqueiro">
+                    <i class="fa-solid fa-plus text-blue-600 text-lg"></i>
+                </button>
             </div>
         </div>
     </header>
@@ -38,13 +43,13 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div class="md:col-span-2"><label for="name-filter" class="block text-xs font-medium text-gray-300">Nome ou Cidade</label><input type="text" id="name-filter" placeholder="Digite para buscar..." class="mt-1 block w-full p-1.5 border border-gray-600 bg-gray-700 rounded-md text-sm"></div>
                     <div class="relative">
-                    <label for="time-filter-btn" class="block text-xs font-medium text-gray-300">Tempo de Viagem</label>
-                    <button id="time-filter-btn" class="mt-1 w-full p-1.5 border border-gray-600 bg-gray-700 rounded-md text-sm text-left flex justify-between items-center">
-                    <span id="time-filter-text">Todos</span>
-                    <i class="fa-solid fa-chevron-down text-xs"></i>
-                    </button>
-                    <div id="time-filter-options" class="absolute hidden z-10 w-full mt-1 bg-gray-700 border border-gray-600 rounded-md shadow-lg">
-                    </div>
+                        <label for="time-filter-btn" class="block text-xs font-medium text-gray-300">Tempo de Viagem</label>
+                        <button id="time-filter-btn" class="mt-1 w-full p-1.5 border border-gray-600 bg-gray-700 rounded-md text-sm text-left flex justify-between items-center">
+                            <span id="time-filter-text">Todos</span>
+                            <i class="fa-solid fa-chevron-down text-xs"></i>
+                        </button>
+                        <div id="time-filter-options" class="absolute hidden z-10 w-full mt-1 bg-gray-700 border border-gray-600 rounded-md shadow-lg">
+                        </div>
                     </div>
                     <div><label for="fish-filter" class="block text-xs font-medium text-gray-300">Espécie de Peixe</label><select id="fish-filter" class="mt-1 block w-full p-1.5 border border-gray-600 bg-gray-700 rounded-md text-sm"><option value="">Todas</option></select></div>
                     <div><label for="price-filter" class="block text-xs font-medium text-gray-300">Preço Máximo (R$)</label><input type="number" id="price-filter" placeholder="Ex: 50" class="mt-1 block w-full p-1.5 border border-gray-600 bg-gray-700 rounded-md text-sm"></div>
@@ -201,22 +206,24 @@
         </div>
     </footer>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            initMap('map');
-            initUI();
-        });
-    </script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
+    <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/Leaflet.fullscreen.min.js' defer></script>
+    <script src="js/api.js" defer></script>
+    <script src="js/map.js" defer></script>
+    <script src="js/ui.js" defer></script>
+    
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/main.min.js' defer></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/locales/pt-br.js' defer></script>
+    <script src="js/calendar_year_view.js" defer></script>
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         initMap('map'); // Inicializa o mapa
         initUI();       // Inicializa a interface do usuário
-        // initYearCalendar() é chamado por DOMContentLoaded em calendar_year_view.js
 
         // Registra o Service Worker AQUI
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
+            window.addEventListener('load', () => { // Usar 'load' para garantir que tudo esteja carregado
                 navigator.serviceWorker.register('/sw.js')
                     .then((reg) => {
                         console.log('Service Worker registrado com sucesso no escopo:', reg.scope);
@@ -227,7 +234,6 @@
             });
         }
     });
-</script>
-
+    </script>
 </body>
 </html>
