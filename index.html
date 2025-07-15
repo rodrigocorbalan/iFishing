@@ -24,7 +24,7 @@
 
 <body class="bg-gray-900 text-gray-200">
     <div id="loader" class="hidden"><div class="spinner"></div></div>
-    <header class="bg-teal-700 text-white p-3 shadow-md">
+    <header class="sticky top-0 z-40 bg-teal-700 text-white p-3 shadow-md">
         <div class="container mx-auto flex justify-between items-center">
             <div class="flex items-center">
                 <img src="img/fishing.png" alt="iFishing Logo" class="h-8">
@@ -37,7 +37,15 @@
                 <h2 class="text-lg font-semibold mb-3">Filtros de Busca</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div class="md:col-span-2"><label for="name-filter" class="block text-xs font-medium text-gray-300">Nome ou Cidade</label><input type="text" id="name-filter" placeholder="Digite para buscar..." class="mt-1 block w-full p-1.5 border border-gray-600 bg-gray-700 rounded-md text-sm"></div>
-                    <div><label for="time-filter" class="block text-xs font-medium text-gray-300">Tempo de Viagem (até)</label><select id="time-filter" class="mt-1 block w-full p-1.5 border border-gray-600 bg-gray-700 rounded-md text-sm"><option value="">Todos</option><option value="30">30 min</option><option value="45">45 min</option><option value="60">60 min</option><option value="75">75 min</option><option value="90">90 min</option><option value="105">105 min</option><option value="120">120 min</option></select></div>
+                    <div class="relative">
+                    <label for="time-filter-btn" class="block text-xs font-medium text-gray-300">Tempo de Viagem</label>
+                    <button id="time-filter-btn" class="mt-1 w-full p-1.5 border border-gray-600 bg-gray-700 rounded-md text-sm text-left flex justify-between items-center">
+                    <span id="time-filter-text">Todos</span>
+                    <i class="fa-solid fa-chevron-down text-xs"></i>
+                    </button>
+                    <div id="time-filter-options" class="absolute hidden z-10 w-full mt-1 bg-gray-700 border border-gray-600 rounded-md shadow-lg">
+                    </div>
+                    </div>
                     <div><label for="fish-filter" class="block text-xs font-medium text-gray-300">Espécie de Peixe</label><select id="fish-filter" class="mt-1 block w-full p-1.5 border border-gray-600 bg-gray-700 rounded-md text-sm"><option value="">Todas</option></select></div>
                     <div><label for="price-filter" class="block text-xs font-medium text-gray-300">Preço Máximo (R$)</label><input type="number" id="price-filter" placeholder="Ex: 50" class="mt-1 block w-full p-1.5 border border-gray-600 bg-gray-700 rounded-md text-sm"></div>
                     <div><label for="reserve-filter" class="block text-xs font-medium text-gray-300">Aceita Reserva?</label><select id="reserve-filter" class="mt-1 block w-full p-1.5 border border-gray-600 bg-gray-700 rounded-md"><option value="">Todos</option><option value="Sim">Sim</option><option value="Não">Não</option></select></div>

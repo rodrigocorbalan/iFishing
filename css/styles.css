@@ -207,3 +207,30 @@ body {
     min-height: 300px; /* Garante uma altura mínima para o calendário */
     /* Mantenha outros estilos como max-width: 100%; margin: 0 auto; font-size: 0.8em; */
 }
+/* Estilos para o novo filtro de tempo customizado */
+#time-filter-options {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.time-filter-option {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+}
+
+.time-filter-option:hover {
+    background-color: #4a5568; /* gray-600 */
+}
+
+.time-filter-option label {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    cursor: pointer;
+}
+
+.time-filter-option input[type="checkbox"] {
+    margin-right: 0.5rem;
+}
