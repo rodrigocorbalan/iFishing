@@ -82,17 +82,17 @@ function setupEventListeners() {
         const result = data.ID ? await updateWishlistItem(data) : await createWishlistItem(data);
         hideLoading();
         document.getElementById('wishlist-form-modal')?.classList.add('hidden');
-        if (result.status === 'success') { alert('Item da wishlist salvo!'); initUI(); } 
-        else { alert('Erro ao salvar item.'); }
-    });
+      if (result.status === 'success') { alert('Item da wishlist salvo!'); refreshWishlist(); } // ALTERADO AQUI
+    else { alert('Erro ao salvar item.'); }
+});
     document.getElementById('btn-confirm-delete-wishlist')?.addEventListener('click', async () => {
         showLoading();
         const result = await deleteWishlistItem(wishlistItemIdToDelete);
         hideLoading();
         document.getElementById('confirm-delete-wishlist-modal')?.classList.add('hidden');
-        if (result.status === 'success') { alert('Item excluído da wishlist!'); initUI(); }
-        else { alert('Erro ao excluir item.'); }
-    });
+    if (result.status === 'success') { alert('Item excluído da wishlist!'); refreshWishlist(); } // ALTERADO AQUI
+    else { alert('Erro ao excluir item.'); }
+});
     document.querySelectorAll('#wishlist-details-modal .modal-close-btn, #wishlist-details-modal .modal-bg').forEach(el => el.addEventListener('click', () => document.getElementById('wishlist-details-modal').classList.add('hidden')));
     document.querySelectorAll('#wishlist-form-modal .modal-close-btn, #wishlist-form-modal .modal-bg').forEach(el => el.addEventListener('click', () => document.getElementById('wishlist-form-modal').classList.add('hidden')));
     document.getElementById('btn-cancel-delete-wishlist')?.addEventListener('click', () => document.getElementById('confirm-delete-wishlist-modal').classList.add('hidden'));
@@ -329,8 +329,25 @@ function showWishlistDetailsModal(item) {
     const title = document.getElementById('wishlist-details-title');
     const content = document.getElementById('wishlist-details-content');
     if (!modal || !title || !content) return;
+
     title.textContent = item.NomeItem;
-    content.innerHTML = `<div class="space-y-2 text-sm"><p><strong>Categoria:</strong> ${item.Categoria||'N/A'}</p><p><strong>Tipo de Pesca:</strong> ${item.TipoPesca||'N/A'}</p><p><strong>Marca/Modelo:</strong> ${item.MarcaModelo||'N/A'}</p><p><strong>Especificações:</strong> ${item.Especificacoes||'N/A'}</p><p><strong>Preço Estimado:</strong> R$ ${item.PrecoEstimado?parseFloat(item.PrecoEstimado).toFixed(2):'N/A'}</p><p><strong>Link:</strong> ${item.LinkCompra?`<a href="${item.LinkCompra}" target="_blank" class="text-teal-400 hover:underline">Abrir Link</a>`:'N/A'}</p><p><strong>Prioridade:</strong> ${item.Prioridade||'N/A'}</p><p><strong>Status:</strong> ${item.Status||'N/A'}</p><p class="mt-4"><strong>Notas:</strong></p><p class="whitespace-pre-wrap bg-gray-700 p-2 rounded border border-gray-600">${item.NotasPessoais||'Nenhuma.'}</p></div>`;
+    content.innerHTML = `
+        <div class="space-y-2 text-sm">
+            <p><strong>Categoria:</strong> ${item.Categoria || 'N/A'}</p>
+            <p><strong>Tipo de Pesca:</strong> ${item.TipoPesca || 'N/A'}</p>
+            <p><strong>Marca/Modelo:</strong> ${item.MarcaModelo || 'N/A'}</p>
+            <p><strong>Preço Estimado:</strong> R$ ${item.PrecoEstimado ? parseFloat(item.PrecoEstimado).toFixed(2) : 'N/A'}</p>
+            <p><strong>Link:</strong> ${item.LinkCompra ? `<a href="${item.LinkCompra}" target="_blank" class="text-teal-400 hover:underline">Abrir Link</a>` : 'N/A'}</p>
+            <p><strong>Prioridade:</strong> ${item.Prioridade || 'N/A'}</p>
+            <p><strong>Status:</strong> ${item.Status || 'N/A'}</p>
+            
+            <p class="mt-4"><strong>Especificações:</strong></p>
+            <p class="whitespace-pre-wrap bg-gray-700 p-2 rounded border border-gray-600">${item.Especificacoes || 'Nenhuma.'}</p>
+            
+            <p class="mt-4"><strong>Notas Pessoais:</strong></p>
+            <p class="whitespace-pre-wrap bg-gray-700 p-2 rounded border border-gray-600">${item.NotasPessoais || 'Nenhuma.'}</p>
+        </div>
+    `;
     modal.classList.remove('hidden');
 }
 

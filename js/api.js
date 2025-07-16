@@ -104,6 +104,30 @@ async function postData(action, data) {
 }
 
 
+
+// ===================================================================
+//              FUNÇÃO DE ATUALIZAÇÃO DA WISHLIST
+// ===================================================================
+
+async function refreshWishlist() {
+    showLoading();
+    try {
+        // 1. Busca apenas os itens atualizados da wishlist
+        todosOsWishlistItems = await getAllWishlistItems();
+        
+        // 2. Redesenha apenas a tabela e a paginação da wishlist
+        displayWishlistPage(wishlistCurrentPage);
+
+    } catch (error) {
+        console.error("Erro ao atualizar a wishlist:", error);
+        alert("Ocorreu um erro ao atualizar a sua lista de desejos.");
+    } finally {
+        hideLoading();
+    }
+}
+
+
+
 // --- FUNÇÕES PARA WISHLIST ---
 
 /**

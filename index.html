@@ -187,13 +187,104 @@
         </div>
     </div>
     
-    <div id="wishlist-details-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center p-4" style="z-index: 60;">
-        </div>
-    <div id="wishlist-form-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center p-4" style="z-index: 60;">
-        </div>
-    <div id="confirm-delete-wishlist-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center p-4" style="z-index: 70;">
-        </div>
+<div id="wishlist-form-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center p-4" style="z-index: 60;">
+        <div class="modal-bg fixed inset-0"></div>
+        <div class="bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl z-10 max-h-[90vh] flex flex-col">
+            <div class="p-4 border-b border-gray-700 flex justify-between items-center">
+                <h2 id="wishlist-form-title" class="text-2xl font-semibold">Adicionar Item</h2>
+                <button class="modal-close-btn text-gray-400 hover:text-white text-3xl">×</button>
+            </div>
+            <div class="p-6 overflow-y-auto">
+                <form id="wishlist-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <input type="hidden" id="wishlist-item-id" name="ID">
     
+    <div class="md:col-span-2">
+        <label for="NomeItem" class="block text-sm font-medium text-gray-300">Nome do Item</label>
+        <input type="text" name="NomeItem" id="NomeItem" class="mt-1 block w-full p-2 border-gray-600 bg-gray-700 rounded-md" required>
+    </div>
+    
+    <div>
+        <label for="Categoria" class="block text-sm font-medium text-gray-300">Categoria</label>
+        <input type="text" name="Categoria" id="Categoria" class="mt-1 block w-full p-2 border-gray-600 bg-gray-700 rounded-md" placeholder="Ex: Vara, Carretilha, Isca...">
+    </div>
+
+    <div>
+        <label for="TipoPesca" class="block text-sm font-medium text-gray-300">Tipo de Pesca</label>
+        <input type="text" name="TipoPesca" id="TipoPesca" class="mt-1 block w-full p-2 border-gray-600 bg-gray-700 rounded-md" placeholder="Ex: Ultra Light, Pesca de Praia...">
+    </div>
+
+    <div class="md:col-span-2">
+        <label for="MarcaModelo" class="block text-sm font-medium text-gray-300">Marca / Modelo</label>
+        <input type="text" name="MarcaModelo" id="MarcaModelo" class="mt-1 block w-full p-2 border-gray-600 bg-gray-700 rounded-md">
+    </div>
+
+    <div class="md:col-span-2">
+        <label for="Especificacoes" class="block text-sm font-medium text-gray-300">Especificações</label>
+        <textarea name="Especificacoes" id="Especificacoes" rows="3" class="mt-1 block w-full p-2 border-gray-600 bg-gray-700 rounded-md"></textarea>
+    </div>
+
+    <div class="md:col-span-2">
+        <label for="LinkCompra" class="block text-sm font-medium text-gray-300">Link para Compra</label>
+        <input type="url" name="LinkCompra" id="LinkCompra" class="mt-1 block w-full p-2 border-gray-600 bg-gray-700 rounded-md" placeholder="https://...">
+    </div>
+
+    <div>
+        <label for="PrecoEstimado" class="block text-sm font-medium text-gray-300">Preço Estimado (R$)</label>
+        <input type="number" step="0.01" name="PrecoEstimado" id="PrecoEstimado" class="mt-1 block w-full p-2 border-gray-600 bg-gray-700 rounded-md">
+    </div>
+
+    <div>
+        <label for="Prioridade" class="block text-sm font-medium text-gray-300">Prioridade</label>
+        <select name="Prioridade" id="Prioridade" class="mt-1 block w-full p-2 border-gray-600 bg-gray-700 rounded-md">
+            <option>Baixa</option>
+            <option>Média</option>
+            <option>Alta</option>
+        </select>
+                </div>
+
+                <div>
+                <label for="Status" class="block text-sm font-medium text-gray-300">Status</label>
+                <select name="Status" id="Status" class="mt-1 block w-full p-2 border-gray-600 bg-gray-700 rounded-md">
+                <option>Pesquisando</option>
+                <option>Planejando comprar</option>
+                <option>Já comprei</option>
+                        <option>Vendido/Trocado</option>
+                </select>
+                </div>
+    
+                <div class="md:col-span-2">
+                <label for="NotasPessoais" class="block text-sm font-medium text-gray-300">Notas</label>
+                <textarea name="NotasPessoais" id="NotasPessoais" rows="3" class="mt-1 block w-full p-2 border-gray-600 bg-gray-700 rounded-md"></textarea>
+                </div>
+    
+                <div class="md:col-span-2 text-right">
+                <button type="submit" class="bg-teal-600 text-white font-semibold px-6 py-2 rounded hover:bg-teal-700">Salvar Item</button>
+                 </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    </div>
+
+    <div id="confirm-delete-wishlist-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center p-4" style="z-index: 70;">
+        <div class="bg-gray-800 rounded-lg shadow-xl w-full max-w-md">
+            <div class="p-6 text-center">
+                <svg class="mx-auto mb-4 w-14 h-14 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <h3 class="mb-5 text-lg font-normal text-gray-400">Você tem certeza que deseja excluir o item <br> <strong id="item-to-delete-name" class="text-gray-200"></strong>?</h3>
+                <button id="btn-confirm-delete-wishlist" class="text-white bg-red-600 hover:bg-red-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2">Sim, tenho certeza</button>
+                <button id="btn-cancel-delete-wishlist" class="text-gray-300 bg-gray-700 hover:bg-gray-600 rounded-lg border border-gray-500 text-sm font-medium px-5 py-2.5 hover:text-white">Não, cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-gray-800 text-gray-400 text-xs p-4 mt-6 border-t border-gray-700">
+        </footer>
+
+    <script>
+        // ...
+    </script>
+
     <footer class="bg-gray-800 text-gray-400 text-xs p-4 mt-6 border-t border-gray-700">
         <div class="container mx-auto flex justify-between items-center">
             <span>iFishing v1.3.0</span>
