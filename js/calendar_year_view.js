@@ -5,62 +5,94 @@
  * @param {Array} visitas - Um array de objetos de visita, já carregado da API.
  */
 function initYearCalendar(visitas) {
-    console.log("--- INICIANDO CALENDÁRIO ANUAL (VERSÃO MULTI-MÊS) ---");
+    console.log("--- INICIANDO CALENDÁRIO COM VISÃO DE LISTA AGRUPADA POR MÊS ---");
     const calendarEl = document.getElementById('year-calendar');
     const loaderEl = document.getElementById('year-calendar-loading');
 
     if (!calendarEl || !loaderEl) {
-        console.error("DEBUG: Elementos do calendário anual não encontrados.");
+        console.error("DEBUG: Elementos do calendário não encontrados.");
         return;
     }
 
-    // Se o calendário já foi renderizado antes, destrói a instância antiga
     if (calendarEl.fullCalendar) {
         calendarEl.fullCalendar('destroy');
     }
 
-    const events = formatVisitsForYearCalendar(visitas);
-    console.log("DEBUG: Eventos para calendário anual formatados.", events);
+    // Ordena as visitas por data para garantir que o agrupamento funcione corretamente
+    const visitasOrdenadas = visitas.sort((a, b) => new Date(a.DataVisita) - new Date(b.DataVisita));
+    const events = formatVisitsForYearCalendar(visitasOrdenadas);
 
-    // Esconde o loader e torna o container do calendário visível
     if (loaderEl) loaderEl.classList.add('hidden');
     calendarEl.style.visibility = 'visible';
 
-    // Usamos um pequeno timeout para garantir que o DOM está pronto
+    let ultimoMesRenderizado = null; // Variável para controlar o agrupamento
+
     setTimeout(() => {
         try {
             const calendar = new FullCalendar.Calendar(calendarEl, {
                 locale: 'pt-br',
 
-                // --- CONFIGURAÇÃO CORRIGIDA PARA VISÃO ANUAL ---
-                initialView: 'multiMonthYear', // Comando para mostrar o ano inteiro
-                multiMonthMaxColumns: 3,       // Organiza os meses em 3 colunas (4 linhas x 3 colunas)
+                // --- NOVA CONFIGURAÇÃO COM LISTA AGRUPADA POR MÊS ---
 
-                // Cabeçalho ajustado para a navegação anual
+                // 1. Define a visão de lista anual como PADRÃO
+                initialView: 'listYear',
+
+                // 2. Configura o cabeçalho
                 headerToolbar: {
-                    left: 'prevYear,nextYear today', // Botões para navegar ano a ano e voltar para o dia de hoje
-                    center: 'title',                 // Mostra o ano atual no centro (Ex: "2025")
-                    right: 'multiMonthYear,listYear'   // Botão para alternar entre a visão de grade e lista anual
+                    left: 'prevYear,nextYear today', // Navega ano a ano
+                    center: 'title',                 // Mostra o ano
+                    right: 'listYear,visaoTrimestral'  // Botões para alternar: Lista Anual e Visão Trimestral
                 },
-                // --- FIM DA CORREÇÃO ---
+                
+                // 3. Define a visão trimestral (mantemos como opção)
+                views: {
+                  visaoTrimestral: {
+                    type: 'dayGrid',
+                    duration: { months: 3 },
+                    buttonText: 'Trimestre'
+                  }
+                },
+
+                // --- FIM DA NOVA CONFIGURAÇÃO ---
 
                 events: events,
+
+                // Formata como a data de cada item da lista aparece
+                listDayFormat: {
+                    month: 'long',
+                    day: 'numeric',
+                    weekday: 'long',
+                    year: 'numeric'
+                },
+                noEventsText: 'Nenhuma visita registrada para este período',
+
+                // 4. LÓGICA PARA INSERIR OS CABEÇALHOS DOS MESES
+                eventDidMount: function(info) {
+                    const mesDoEvento = info.event.start.toLocaleString('pt-br', { month: 'long' }).toUpperCase();
+                    if (mesDoEvento !== ultimoMesRenderizado) {
+                        // Cria um novo cabeçalho de mês
+                        const header = document.createElement('div');
+                        header.className = 'month-header-list'; // Classe para o estilo
+                        header.textContent = mesDoEvento;
+
+                        // Insere o cabeçalho antes do item da lista
+                        info.el.parentNode.insertBefore(header, info.el);
+                        
+                        ultimoMesRenderizado = mesDoEvento;
+                    }
+                },
+                
                 eventClick: function(info) {
-                    // Monta uma mensagem com os detalhes da visita para exibir num alerta
                     const detalhes = `Pesqueiro: ${info.event.title}\n` +
                                     `Data: ${info.event.start.toLocaleDateString('pt-BR')}\n` +
                                     `Peixes: ${info.event.extendedProps.peixes || 'Não registrado.'}\n` +
                                     `Observações: ${info.event.extendedProps.observacoes || 'Nenhuma.'}`;
                     alert(detalhes);
-                },
-                eventDidMount: function(info) {
-                    // Adiciona um "tooltip" (dica) ao passar o mouse sobre um evento
-                    info.el.title = `Clique para ver detalhes da visita ao ${info.event.title}`;
                 }
             });
 
             calendar.render();
-            console.log("--- CALENDÁRIO ANUAL MULTI-MÊS RENDERIZADO COM SUCESSO ---");
+            console.log("--- CALENDÁRIO COM LISTA AGRUPADA RENDERIZADO ---");
 
         } catch (e) {
             console.error("ERRO CRÍTICO AO RENDERIZAR O FULLCALENDAR:", e);
@@ -82,8 +114,8 @@ function formatVisitsForYearCalendar(visitas) {
         return [];
     }
     return visitas.map(visita => {
-        // Garante que o nome do pesqueiro existe
-        const pesqueiroNome = todosOsPesqueiros.find(p => p.ID == visita.PesqueiroID)?.NomePesqueiro || 'Visita';
+        const pesqueiro = todosOsPesqueiros.find(p => p.ID == visita.PesqueiroID);
+        const pesqueiroNome = pesqueiro ? pesqueiro.NomePesqueiro : 'Visita';
         return {
             title: pesqueiroNome,
             start: visita.DataVisita,

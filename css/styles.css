@@ -234,3 +234,24 @@ body {
 .time-filter-option input[type="checkbox"] {
     margin-right: 0.5rem;
 }
+
+/* Estilo para o cabeçalho do mês na visão de lista */
+.month-header-list {
+    font-size: 1.25rem; /* 20px */
+    font-weight: bold;
+    color: #93c5fd; /* Um azul claro para destacar (text-blue-300) */
+    padding: 1rem 0.5rem 0.5rem 0.5rem; /* Espaçamento */
+    border-bottom: 2px solid #374151; /* gray-700 */
+    margin-top: 1rem;
+}
+
+/* Remove a data padrão que fica ao lado de cada item na lista */
+.fc-list-day-side-text {
+    display: none !important;
+}
+
+/* Ajusta o texto da data principal de cada item */
+.fc-list-day-text {
+    font-weight: bold;
+    color: #10b981; /* teal-500 */
+}
