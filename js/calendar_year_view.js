@@ -14,48 +14,60 @@ function initYearCalendar(visitas) {
         return;
     }
 
+    // Se o calendário já foi renderizado antes, destrói a instância antiga
+    if (calendarEl.fullCalendar) {
+        calendarEl.fullCalendar('destroy');
+    }
+
     const events = formatVisitsForYearCalendar(visitas);
     console.log("DEBUG: Eventos para calendário anual formatados.", events);
 
-    loaderEl.classList.add('hidden');
+    // Esconde o loader e torna o container do calendário visível
+    if (loaderEl) loaderEl.classList.add('hidden');
     calendarEl.style.visibility = 'visible';
 
+    // Usamos um pequeno timeout para garantir que o DOM está pronto
     setTimeout(() => {
         try {
             const calendar = new FullCalendar.Calendar(calendarEl, {
                 locale: 'pt-br',
 
-                // --- MUDANÇAS PRINCIPAIS AQUI ---
-                initialView: 'multiMonthYear', // Mudei para a visão de ano
-                multiMonthMaxColumns: 3, // Organiza os meses em 3 colunas. Pode ajustar para 2 ou 4.
+                // --- CONFIGURAÇÃO CORRIGIDA PARA VISÃO ANUAL ---
+                initialView: 'multiMonthYear', // Comando para mostrar o ano inteiro
+                multiMonthMaxColumns: 3,       // Organiza os meses em 3 colunas (4 linhas x 3 colunas)
 
+                // Cabeçalho ajustado para a navegação anual
                 headerToolbar: {
-                    left: 'prevYear,nextYear today', // Botões para navegar ano a ano
-                    center: 'title', // Mostra o ano atual
-                    right: 'multiMonthYear,listYear' // Opções de visualização
+                    left: 'prevYear,nextYear today', // Botões para navegar ano a ano e voltar para o dia de hoje
+                    center: 'title',                 // Mostra o ano atual no centro (Ex: "2025")
+                    right: 'multiMonthYear,listYear'   // Botão para alternar entre a visão de grade e lista anual
                 },
-                // --- FIM DAS MUDANÇAS ---
+                // --- FIM DA CORREÇÃO ---
 
                 events: events,
                 eventClick: function(info) {
+                    // Monta uma mensagem com os detalhes da visita para exibir num alerta
                     const detalhes = `Pesqueiro: ${info.event.title}\n` +
                                     `Data: ${info.event.start.toLocaleDateString('pt-BR')}\n` +
                                     `Peixes: ${info.event.extendedProps.peixes || 'Não registrado.'}\n` +
-                                    `Obs: ${info.event.extendedProps.observacoes || 'Nenhuma.'}`;
+                                    `Observações: ${info.event.extendedProps.observacoes || 'Nenhuma.'}`;
                     alert(detalhes);
                 },
                 eventDidMount: function(info) {
+                    // Adiciona um "tooltip" (dica) ao passar o mouse sobre um evento
                     info.el.title = `Clique para ver detalhes da visita ao ${info.event.title}`;
                 }
             });
 
             calendar.render();
-            console.log("--- CALENDÁRIO ANUAL MULTI-MÊS RENDERIZADO ---");
+            console.log("--- CALENDÁRIO ANUAL MULTI-MÊS RENDERIZADO COM SUCESSO ---");
 
         } catch (e) {
             console.error("ERRO CRÍTICO AO RENDERIZAR O FULLCALENDAR:", e);
-            loaderEl.classList.remove('hidden');
-            loaderEl.textContent = `Erro ao renderizar o calendário: ${e.message}`;
+            if (loaderEl) {
+                loaderEl.classList.remove('hidden');
+                loaderEl.textContent = `Erro ao renderizar o calendário: ${e.message}`;
+            }
         }
     }, 0);
 }
@@ -70,8 +82,10 @@ function formatVisitsForYearCalendar(visitas) {
         return [];
     }
     return visitas.map(visita => {
+        // Garante que o nome do pesqueiro existe
+        const pesqueiroNome = todosOsPesqueiros.find(p => p.ID == visita.PesqueiroID)?.NomePesqueiro || 'Visita';
         return {
-            title: visita.PesqueiroNome || 'Visita sem nome',
+            title: pesqueiroNome,
             start: visita.DataVisita,
             allDay: true,
             extendedProps: {
