@@ -12,7 +12,9 @@ let pesqueiroIdToDelete = null;
 let wishlistCurrentPage = 1;
 const wishlistRowsPerPage = 10;
 let todosOsWishlistItems = [];
+let wishlistFiltrada = [];
 let wishlistItemIdToDelete = null;
+
 
 // ===================================================================
 //              FUNÇÕES GERAIS DE UI E INICIALIZAÇÃO
@@ -33,7 +35,7 @@ async function initUI() {
         todosOsPesqueiros = pesqueiros;
         pesqueirosFiltrados = [...todosOsPesqueiros];
         todosOsWishlistItems = wishlistItems;
-        
+        applyAndSortWishlist();
         setupEventListeners();
         
         sortAndRerenderPesqueiros();
@@ -57,6 +59,15 @@ async function initUI() {
 
 function setupEventListeners() {
     setupTimeFilter();
+
+// Adicione isto dentro de setupEventListeners()
+document.getElementById('wishlist-name-filter')?.addEventListener('input', applyAndSortWishlist);
+document.getElementById('wishlist-status-filter')?.addEventListener('change', applyAndSortWishlist);
+document.getElementById('wishlist-reset-filters')?.addEventListener('click', () => {
+    document.getElementById('wishlist-name-filter').value = '';
+    document.getElementById('wishlist-status-filter').value = '';
+    applyAndSortWishlist();
+});
 
     // Listeners da Wishlist
     document.getElementById('add-wishlist-item-btn')?.addEventListener('click', () => showWishlistFormModal());
@@ -181,6 +192,41 @@ function setupEventListeners() {
 // ===================================================================
 //              FUNÇÕES DE FILTRAGEM E ORDENAÇÃO
 // ===================================================================
+
+function applyAndSortWishlist() {
+    // Pega os valores atuais dos filtros
+    const nameFilterValue = document.getElementById('wishlist-name-filter')?.value?.toLowerCase() || '';
+    const statusFilterValue = document.getElementById('wishlist-status-filter')?.value || '';
+
+    // 1. Aplica os filtros
+    let items = todosOsWishlistItems.filter(item => {
+        const nameMatch = nameFilterValue ? item.NomeItem?.toLowerCase().includes(nameFilterValue) : true;
+        const statusMatch = statusFilterValue ? item.Status === statusFilterValue : true;
+        return nameMatch && statusMatch;
+    });
+
+    // 2. Aplica a ordenação customizada
+    const statusOrder = {
+        'Pesquisando': 1,
+        'Planejando comprar': 2,
+        'Vendido/Trocado': 98,
+        'Já comprei': 99
+    };
+
+    items.sort((a, b) => {
+        const orderA = statusOrder[a.Status] || 50; // Itens sem status definido ficam no meio
+        const orderB = statusOrder[b.Status] || 50;
+        return orderA - orderB;
+    });
+
+    // 3. Atualiza a nossa variável global com os dados prontos para exibição
+    wishlistFiltrada = items;
+    
+    // 4. Renderiza a tabela novamente, começando da primeira página
+    displayWishlistPage(1);
+}
+
+
 function setupTimeFilter() {
     const optionsContainer = document.getElementById('time-filter-options');
     const btn = document.getElementById('time-filter-btn');
@@ -289,7 +335,7 @@ function renderWishlistTable() {
     tableBody.innerHTML = '';
     const startIndex = (wishlistCurrentPage - 1) * wishlistRowsPerPage;
     const endIndex = startIndex + wishlistRowsPerPage;
-    const paginatedItems = todosOsWishlistItems.slice(startIndex, endIndex);
+   const paginatedItems = wishlistFiltrada.slice(startIndex, endIndex);
     if (paginatedItems.length === 0) {
         tableBody.innerHTML = '<tr><td colspan="4" class="text-center p-4 text-gray-400">Nenhum item na sua wishlist.</td></tr>';
         return;
@@ -298,7 +344,7 @@ function renderWishlistTable() {
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-gray-700 cursor-pointer item-row';
         tr.setAttribute('data-id', item.ID);
-        tr.innerHTML = `<td class="p-2 border-t border-gray-700">${item.NomeItem||'N/A'}</td><td class="p-2 border-t border-gray-700">R$ ${item.PrecoEstimado?parseFloat(item.PrecoEstimado).toFixed(2):'N/A'}</td><td class="p-2 border-t border-gray-700">${item.Status||'N/A'}</td><td class="p-2 border-t border-gray-700 text-right"><div class="flex gap-2 justify-end"><button class="btn-edit-wishlist text-xs bg-sky-700 hover:bg-sky-600 text-white font-bold py-1 px-2 rounded">Editar</button><button class="btn-delete-wishlist text-xs bg-rose-700 hover:bg-rose-600 text-white font-bold py-1 px-2 rounded">Remover</button></div></td>`;
+        tr.innerHTML = `<td class="p-2 border-t border-gray-700">${item.NomeItem||'N/A'}</td><td class="p-2 border-t border-gray-700">R$ ${item.PrecoEstimado?parseFloat(item.PrecoEstimado).toFixed(2):'N/A'}</td><td class="p-2 border-t border-gray-700">${item.Status||'N/A'}</td><td class="p-2 border-t border-gray-700 text-right"><div class="flex gap-2 justify-end"><button class="btn-edit-wishlist text-xs bg-sky-700 hover:bg-sky-600 text-white font-bold py-1 px-2 rounded">Editar</button><button class="btn-delete-wishlist text-xs bg-rose-700 hover:bg-rose-600 text-white font-bold py-1 px-2 rounded">Excluir</button></div></td>`;
         tableBody.appendChild(tr);
     });
 }
@@ -307,7 +353,7 @@ function renderWishlistPagination() {
     const paginationControls = document.getElementById('wishlist-pagination-controls');
     if (!paginationControls) return;
     paginationControls.innerHTML = '';
-    const totalPages = Math.ceil(todosOsWishlistItems.length / wishlistRowsPerPage);
+    const totalPages = Math.ceil(wishlistFiltrada.length / wishlistRowsPerPage);
     if (totalPages <= 1) return;
     const createButton = (text, page, isDisabled = false, isCurrent = false) => {
         const button = document.createElement('button');

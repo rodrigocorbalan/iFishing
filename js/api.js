@@ -114,7 +114,7 @@ async function refreshWishlist() {
     try {
         // 1. Busca apenas os itens atualizados da wishlist
         todosOsWishlistItems = await getAllWishlistItems();
-        
+         applyAndSortWishlist();
         // 2. Redesenha apenas a tabela e a paginação da wishlist
         displayWishlistPage(wishlistCurrentPage);
 

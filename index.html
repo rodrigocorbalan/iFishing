@@ -60,6 +60,7 @@
                 <h2 class="text-lg font-semibold">Lista de Pesqueiros</h2>
                 <button id="add-pesqueiro-btn" class="bg-teal-700 text-white font-semibold px-3 py-1.5 rounded hover:bg-teal-600 text-sm">+ Adicionar Pesqueiro</button>
             </div>
+
             <div id="table-container" class="overflow-x-auto">
                 <table class="w-full text-sm text-left">
                     <thead class="bg-gray-700 text-xs uppercase">
@@ -85,6 +86,28 @@
                 <h2 class="text-lg font-semibold">Minha Wishlist</h2>
                 <button id="add-wishlist-item-btn" class="bg-teal-700 text-white font-semibold px-3 py-1.5 rounded hover:bg-teal-600 text-sm">+ Adicionar Item</button>
             </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 p-3 bg-gray-700 rounded-md border border-gray-600">
+                 <div>
+                    <label for="wishlist-name-filter" class="block text-xs font-medium text-gray-300">Buscar por Nome</label>
+                    <input type="text" id="wishlist-name-filter" placeholder="Nome do item..." class="mt-1 block w-full p-1.5 border border-gray-600 bg-gray-900 rounded-md text-sm">
+            </div>
+            <div>
+                <label for="wishlist-status-filter" class="block text-xs font-medium text-gray-300">Filtrar por Status</label>
+                <select id="wishlist-status-filter" class="mt-1 block w-full p-1.5 border border-gray-600 bg-gray-900 rounded-md text-sm">
+                    <option value="">Todos</option>
+                    <option>Pesquisando</option>
+                    <option>Planejando comprar</option>
+                    <option>Já comprei</option>
+                    <option>Vendido/Trocado</option>
+            </select>
+    </div>
+    <div>
+        <label class="block text-xs font-medium text-transparent">.</label>
+        <button id="wishlist-reset-filters" class="mt-1 w-full bg-gray-500 text-white px-3 py-1.5 rounded hover:bg-gray-600 text-sm">Limpar Filtros</button>
+    </div>
+</div>    
+
             <div id="wishlist-table-container" class="overflow-x-auto">
                 <table class="w-full text-sm text-left">
                     <thead class="bg-gray-700 text-xs uppercase">
