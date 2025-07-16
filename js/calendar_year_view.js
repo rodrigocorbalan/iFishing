@@ -5,7 +5,7 @@
  * @param {Array} visitas - Um array de objetos de visita, já carregado da API.
  */
 function initYearCalendar(visitas) {
-    console.log("--- INICIANDO CALENDÁRIO ANUAL (VERSÃO MENSAL) ---");
+    console.log("--- INICIANDO CALENDÁRIO ANUAL (VERSÃO MULTI-MÊS) ---");
     const calendarEl = document.getElementById('year-calendar');
     const loaderEl = document.getElementById('year-calendar-loading');
 
@@ -25,21 +25,23 @@ function initYearCalendar(visitas) {
             const calendar = new FullCalendar.Calendar(calendarEl, {
                 locale: 'pt-br',
 
-                // --- VOLTANDO PARA A VISÃO MENSAL ---
-                initialView: 'dayGridMonth', // Voltamos para a visão de um mês.
+                // --- MUDANÇAS PRINCIPAIS AQUI ---
+                initialView: 'multiMonthYear', // Mudei para a visão de ano
+                multiMonthMaxColumns: 3, // Organiza os meses em 3 colunas. Pode ajustar para 2 ou 4.
+
                 headerToolbar: {
-                    left: 'prev,next today', // Botões para navegar entre meses.
-                    center: 'title',         // Mostra o mês e ano atuais.
-                    right: 'dayGridMonth,listYear' // Opções de visualização.
+                    left: 'prevYear,nextYear today', // Botões para navegar ano a ano
+                    center: 'title', // Mostra o ano atual
+                    right: 'multiMonthYear,listYear' // Opções de visualização
                 },
-                // --- FIM DA ALTERAÇÃO ---
+                // --- FIM DAS MUDANÇAS ---
 
                 events: events,
                 eventClick: function(info) {
                     const detalhes = `Pesqueiro: ${info.event.title}\n` +
-                                     `Data: ${info.event.start.toLocaleDateString('pt-BR')}\n` +
-                                     `Peixes: ${info.event.extendedProps.peixes || 'Não registrado.'}\n` +
-                                     `Obs: ${info.event.extendedProps.observacoes || 'Nenhuma.'}`;
+                                    `Data: ${info.event.start.toLocaleDateString('pt-BR')}\n` +
+                                    `Peixes: ${info.event.extendedProps.peixes || 'Não registrado.'}\n` +
+                                    `Obs: ${info.event.extendedProps.observacoes || 'Nenhuma.'}`;
                     alert(detalhes);
                 },
                 eventDidMount: function(info) {
@@ -48,14 +50,14 @@ function initYearCalendar(visitas) {
             });
 
             calendar.render();
-            console.log("--- CALENDÁRIO ANUAL RENDERIZADO COM SUCESSO ---");
+            console.log("--- CALENDÁRIO ANUAL MULTI-MÊS RENDERIZADO ---");
 
         } catch (e) {
             console.error("ERRO CRÍTICO AO RENDERIZAR O FULLCALENDAR:", e);
             loaderEl.classList.remove('hidden');
             loaderEl.textContent = `Erro ao renderizar o calendário: ${e.message}`;
         }
-    }, 0); 
+    }, 0);
 }
 
 /**
