@@ -207,27 +207,5 @@
             initUI();
         });
     </script>
-
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        initMap('map'); // Inicializa o mapa
-        initUI();       // Inicializa a interface do usuário
-        // initYearCalendar() é chamado por DOMContentLoaded em calendar_year_view.js
-
-        // Registra o Service Worker AQUI
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then((reg) => {
-                        console.log('Service Worker registrado com sucesso no escopo:', reg.scope);
-                    })
-                    .catch((error) => {
-                        console.error('Falha no registro do Service Worker:', error);
-                    });
-            });
-        }
-    });
-</script>
-
 </body>
 </html>
